@@ -432,4 +432,14 @@ $_['text_newest_record'] = 'Newest Record';
 $_['text_items'] = 'Items';
 $_['text_average_size'] = 'Avg size';
 
+$_['text_return_to'] = 'Return to';
+$_['text_error_message'] = 'Please correct the below errors and re-submit.';
+$_['text_field_required'] = 'This field is required.';
+$_['text_field_length'] = 'This field is required to be longer than ? characters.';
+$_['text_field_domain'] = 'This field must be a valid domain (ie - domain.com).';
+$_['text_delete'] = 'Delete';
+$_['text_confirm'] = 'Confirm';
+$_['text_user_delete_confirm_message'] = 'Do you wish to delete the user';
+$_['text_domain_delete_confirm_message'] = 'Do you wish to delete the domain';
+$_['text_with_selected'] = 'With Selected';
 ?>

@@ -36,13 +36,12 @@
 
 <body onload="Piler.add_shortcuts();">
 
+    <div id="menu">
+        <?php print $menu; ?>
+    </div>
     <div id="messagebox1" class="alert alert-info lead"></div>
 
     <div id="piler1" class="container-fluid">
-
-    <div id="menu">
-    <?php print $menu; ?>
-    </div>
 
     <div id="searchcontainer">
          <input type="hidden" name="searchtype" id="searchtype" value="expert" />
@@ -52,14 +51,15 @@
          <input type="hidden" name="prefix" id="prefix" value="" />
 
          <div class="control-group">
-            <div class="controls">
-                <label for="_search">Search</label>
-                <div class="input-append">            
+            <div class="controls row-fluid">
+                <div id="input-span" class="span6">
+                    <label for="_search">Search</label>
                 <input type="text" id="_search" name="_search" placeholder="<?php print $text_enter_search_terms; ?>" />
-                <div class="btn-group">
+                </div>
+                <div class="span6 input-append btn-group">
                     <button id="button_search" class="btn btn-large btn-danger" onclick="Piler.expert(this);"><i class="icon-search icon-large"></i>&nbsp;<?php print $text_search; ?></button>
                     <button id="button_expert" class="btn btn-large btn-inverse" onclick="$('#searchpopup1').show();"><?php print $text_advanced_search; ?> &nbsp;<span class="caret"></span></button>
-                    <button class="btn btn-large btn-inverse dropdown-toggle" data-toggle="dropdown"><?php print $text_options; ?> &nbsp;<span class="caret"></span></button>
+                    <button id="button_options" class="btn btn-large btn-inverse dropdown-toggle" data-toggle="dropdown"><?php print $text_options; ?> &nbsp;<span class="caret"></span></button>
                     <ul class="dropdown-menu">
                         <li><a href="#" onclick="Piler.saved_search_terms('<?php print $text_saved; ?>');"><?php print $text_save; ?></a></li>
                         <li><a href="#" onclick="Piler.load_saved_search_terms();"><?php print $text_load; ?></a></li>

@@ -41,9 +41,12 @@ if(isset($this->request->get['route'])) {
 
 } ?>>
 
+<div id="menu">
+    <?php print $menu; ?>
+</div>
+
 <div id="piler1" class="container">
 
-   <div id="menu"><?php print $menu; ?></div>
 
    <div id="main">
 
