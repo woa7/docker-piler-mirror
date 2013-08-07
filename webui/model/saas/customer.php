@@ -36,7 +36,7 @@ class ModelSaasCustomer extends Model
 
       if(!isset($arr['domain']) || !isset($arr['branding_text'])) { return 0; }
 
-      if(isset($_FILES['branding_logo']['name'])) {
+      if(isset($_FILES['branding_logo']['name']) && strlen($_FILES['branding_logo']['name'])>0) {
          $branding_logo = $_FILES['branding_logo']['name'];
          move_uploaded_file($_FILES['branding_logo']['tmp_name'], DIR_BASE . "/images/" . $_FILES['branding_logo']['name']);
       }
@@ -55,10 +55,10 @@ class ModelSaasCustomer extends Model
 
    public function update($arr = array()) {
       $branding_logo = '';
-
+      
       if(!isset($arr['id']) || !isset($arr['domain']) || !isset($arr['branding_text'])) { return 0; }
 
-      if(isset($_FILES['branding_logo']['name'])) {
+      if(isset($_FILES['branding_logo']['name']) && strlen($_FILES['branding_logo']['name'])>0) {
          $branding_logo = $_FILES['branding_logo']['name'];
          move_uploaded_file($_FILES['branding_logo']['tmp_name'], DIR_BASE . "/images/" . $_FILES['branding_logo']['name']);
 

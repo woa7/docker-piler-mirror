@@ -63,11 +63,17 @@
                 </ul>
             
                 <ul class="nav pull-right">
-		<?php if($settings['branding_url']) { ?><li><a href="<?php print $settings['branding_url']; ?>" target="_blank"><i class="icon-phone"></i>&nbsp;<?php print $settings['branding_text']; ?></a></li><?php } ?>
+	<?php if($settings['branding_url']) { ?>
+                    <li><a href="<?php print $settings['branding_url']; ?>" target="_blank"><i class="icon-phone"></i>&nbsp;<?php print $settings['branding_text']; ?></a></li>
+    <?php } ?>
 
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i>&nbsp;<?php if(isset($_SESSION['realname'])) { print $_SESSION['realname']; ?>&nbsp;<?php } ?><b class="caret"></b></a>
                         <ul class="dropdown-menu">
+    <?php if($settings['support_link']) { ?>
+                            <li><a href="<?php print $settings['support_link']; ?>" target="_blank"><i class="icon-question-sign"></i>&nbsp;<?php print $text_contact_support; ?></a></li>
+                            <li class="divider"></li>
+    <?php } ?>
                             <li><a href="settings.php"><i class="icon-cog"></i>&nbsp;Settings</a></li>
                             <li class="divider"></li>
                             <li><a href="logout.php"><i class="icon-off"></i>&nbsp;<?php print $text_logout; ?></a></li>

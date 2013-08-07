@@ -21,7 +21,11 @@ class ControllerDomainDomain extends Controller {
       if(ENABLE_SAAS == 1) {
          $this->load->model('saas/ldap');
          $this->data['ldap'] = $this->model_saas_ldap->get();
-         $ldap_id = $this->request->post['ldap_id'];
+         if ( isset($this->request->post['ldap_id']) ) {
+            $ldap_id = $this->request->post['ldap_id'];
+         } else {
+            $ldap_id = 0;
+         }
       }
 
       $this->document->title = $this->data['text_domain'];

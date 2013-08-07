@@ -1085,7 +1085,7 @@ $(document).on("click", ".confirm-delete", function (e) {
      //set id
      url = UpdateQueryString('id',id,url);
      //set name
-     url = UpdateQueryString('name',name,url);
+     url = UpdateQueryString('name',encodeURIComponent(name),url);
      //set confirmation
      url = UpdateQueryString('confirmed',1,url);
      //set href

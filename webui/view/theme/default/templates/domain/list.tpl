@@ -66,7 +66,6 @@
       <tr>
          <th><?php print $text_domain; ?></th>
          <th><?php print $text_mapped_domain; ?></th>
-         <th>&nbsp;</th>
       <?php if(ENABLE_SAAS == 1) { ?>
          <th><?php print $text_ldap; ?></th>
       <?php } ?>
@@ -78,9 +77,9 @@
          <td><a href="index.php?route=user/list&search=@<?php print $domain['domain']; ?>"><?php print $domain['domain']; ?></a></td>
          <td><?php print $domain['mapped']; ?></td>
       <?php if(ENABLE_SAAS == 1) { ?>
-         <td><?php print $domain['ldap']; ?></td>
+         <td><?php if(isset($domain['ldap'])) {print $domain['ldap'];} else {print '&nbsp;';} ?></td>
       <?php } ?>
-         <td><a href="index.php?route=domain/remove&amp;id=1&amp;name=<?php print urlencode($domain['domain']); ?>" class="confirm-delete" data-id="1" data-name="<?php print urlencode($domain['domain']); ?>"><?php print $text_remove; ?></a></td>
+         <td><a href="index.php?route=domain/remove&amp;id=1&amp;name=<?php print urlencode($domain['domain']); ?>" class="confirm-delete" data-id="1" data-name="<?php print urlencode($domain['domain']); ?>"><i class="icon-remove-sign"></i>&nbsp;<?php print $text_remove; ?></a></td>
       </tr>
 <?php } ?>
 
