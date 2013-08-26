@@ -8,7 +8,7 @@ class ControllerCustomerList extends Controller {
 
       $this->id = "content";
       $this->template = "customer/list.tpl";
-      $this->layout = "common/layout";
+      $this->layout = "common/layout-customer";
 
 
       $request = Registry::get('request');
@@ -33,12 +33,6 @@ class ControllerCustomerList extends Controller {
       $this->data['id'] = -1;
 
       if(isset($this->request->get['id'])) { $this->data['id'] = $this->request->get['id']; }
-
-      $this->data['search'] = '';
-
-      if(isset($this->request->post['search'])) { $this->data['search'] = $this->request->post['search']; }
-      else if(isset($this->request->get['search'])) { $this->data['search'] = $this->request->get['search']; }
-
 
       /* check if we are admin */
       
@@ -78,7 +72,7 @@ class ControllerCustomerList extends Controller {
             $this->data['a'] = $this->model_saas_customer->get($this->data['id']);  
          }
          else {
-            $this->data['entries'] = $this->model_saas_customer->search($this->data['search']);
+            $this->data['entries'] = $this->model_saas_customer->get();
          }
          
          if ( isset($this->data['errorstring']) ) {
@@ -88,8 +82,7 @@ class ControllerCustomerList extends Controller {
             if (isset($this->request->post['branding_url'])) { $this->data['a']['branding_url'] = $this->request->post['branding_url'];}
             if (isset($this->request->post['branding_logo'])) { $this->data['a']['branding_logo'] = $this->request->post['branding_logo'];}
             if (isset($this->request->post['support_link'])) { $this->data['a']['support_link'] = $this->request->post['support_link'];}
-            if (isset($this->request->post['text_colour'])) { $this->data['a']['text_colour'] = $this->request->post['text_colour'];}
-            if (isset($this->request->post['background_colour'])) { $this->data['a']['background_colour'] = $this->request->post['background_colour'];}
+            if (isset($this->request->post['colour'])) { $this->data['a']['colour'] = $this->request->post['colour'];}
          }
          
       }
@@ -113,13 +106,10 @@ class ControllerCustomerList extends Controller {
          $this->error['branding_text'] = $this->data['text_field_required'];
       }
       // if colour is provided it must be in the format #fcfcfc or #fcf
-      if(isset($this->request->post['text_colour']) && strlen($this->request->post['text_colour']) > 0 && !preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $this->request->post['text_colour'])) {
-         $this->error['text_colour'] = $this->data['text_field_colour'];
+      if(isset($this->request->post['colour']) && strlen($this->request->post['colour']) > 0 && !preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $this->request->post['colour'])) {
+         $this->error['colour'] = $this->data['text_field_colour'];
       }
-      if(isset($this->request->post['background_colour']) && strlen($this->request->post['background_colour']) > 0 && !preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $this->request->post['background_colour'])) {
-         $this->error['background_colour'] = $this->data['text_field_colour'];
-      }
-
+      
       if (!$this->error) {
          return true;
       } else {
