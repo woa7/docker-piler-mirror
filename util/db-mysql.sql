@@ -297,9 +297,12 @@ create table if not exists `folder_extra` (
 
 
 create table if not exists `folder_message` (
-   folder_id bigint not null,
-   id bigint not null,
-   unique(folder_id, id)
+   `id` bigint unsigned auto_increment not null,
+   `folder_id` bigint not null,
+   `message_id` bigint not null,
+   `uid` int not null,
+   unique(`folder_id`, `message_id`, `uid`),
+   key (`id`)
 ) ENGINE=InnoDB;
 
 

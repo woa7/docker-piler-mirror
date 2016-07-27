@@ -96,6 +96,16 @@ int import_message(char *filename, struct session_data *sdata, struct __data *da
          rc = reimport_message(sdata, &state, data, cfg);
       else
          rc = process_message(sdata, &state, data, cfg);
+
+      /*
+       * if pilerimport was invoked with --uid, and this is a duplicate,
+       * then add it to the folder_extra table
+       */
+
+      if(rc == ERR_EXISTS && data->import->uid > 0){
+         store_folder_id(sdata, data, sdata->duplicate_id);
+      }
+
       unlink(state.message_id_hash);
    }
 

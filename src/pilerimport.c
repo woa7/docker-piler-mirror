@@ -50,6 +50,7 @@ void usage(){
    printf("    -f <imap folder>                  IMAP folder name to import\n");
    printf("    -g <imap folder>                  Move email after import to this IMAP folder\n");
    printf("    -F <folder>                       Piler folder name to assign to this import\n");
+   printf("    --uid <uidr>                      UID to assign to this import\n");
    printf("    -R                                Assign IMAP folder names as Piler folder names\n");
    printf("    -b <batch limit>                  Import only this many emails\n");
    printf("    -s <start position>               Start importing POP3 emails from this position\n");
@@ -88,6 +89,7 @@ int main(int argc, char **argv){
    import.start_position = 1;
    import.download_only = 0;
    import.timeout = 30;
+   import.uid = 0;
 
    data.import = &import;
 
@@ -114,6 +116,7 @@ int main(int argc, char **argv){
             {"skiplist",     required_argument,  0,  'x' },
             {"folder",       required_argument,  0,  'F' },
             {"folder_imap",  required_argument,  0,  'f' },
+            {"uid",          required_argument,  0,  'U' },
             {"add-recipient",required_argument,  0,  'a' },
             {"batch-limit",  required_argument,  0,  'b' },
             {"timeout",      required_argument,  0,  't' },
@@ -132,9 +135,9 @@ int main(int argc, char **argv){
 
       int option_index = 0;
 
-      c = getopt_long(argc, argv, "c:m:M:e:d:i:K:u:p:P:x:F:f:a:b:t:s:g:GDRrozqh?", long_options, &option_index);
+      c = getopt_long(argc, argv, "c:m:M:e:d:i:K:u:p:P:x:F:f:a:b:t:s:g:U:GDRrozqh?", long_options, &option_index);
 #else
-      c = getopt(argc, argv, "c:m:M:e:d:i:K:u:p:P:x:F:f:a:b:t:s:g:GDRrozqh?");
+      c = getopt(argc, argv, "c:m:M:e:d:i:K:u:p:P:x:F:f:a:b:t:s:g:U:GDRrozqh?");
 #endif
 
       if(c == -1) break;
@@ -177,6 +180,10 @@ int main(int argc, char **argv){
 
          case 'u' :
                     username = optarg;
+                    break;
+
+         case 'U' :
+                    data.import->uid = atoi(optarg);
                     break;
 
          case 'p' :
@@ -298,10 +305,19 @@ int main(int argc, char **argv){
 #endif
 
    if(folder){
-      data.folder = get_folder_id(&sdata, &data, folder, 0);
+      if(data.import->uid > 0){
+         data.folder = get_folder_extra_id(&sdata, &data, folder);
 
-      if(data.folder == ERR_FOLDER){
-         data.folder = add_new_folder(&sdata, &data, folder, 0);
+         if(data.folder == ERR_FOLDER){
+            data.folder = add_new_folder_extra(&sdata, &data, folder);
+         }
+      }
+      else {
+         data.folder = get_folder_id(&sdata, &data, folder, 0);
+
+         if(data.folder == ERR_FOLDER){
+            data.folder = add_new_folder(&sdata, &data, folder, 0);
+         }
       }
 
       if(data.folder == ERR_FOLDER){
@@ -309,7 +325,6 @@ int main(int argc, char **argv){
          close_database(&sdata);
          return 0;
       }
-
    }
 
    load_rules(&sdata, &data, data.archiving_rules, SQL_ARCHIVING_RULE_TABLE);

@@ -13,7 +13,7 @@
 
 #define VERSION "1.2.0-master"
 
-#define BUILD 945
+#define BUILD 946
 
 #define HOSTID "mailarchiver"
 
@@ -83,6 +83,7 @@
 #define SQL_ARCHIVING_RULE_TABLE "archiving_rule"
 #define SQL_RETENTION_RULE_TABLE "retention_rule"
 #define SQL_FOLDER_RULE_TABLE "folder_rule"
+#define SQL_FOLDER_EXTRA_TABLE "folder_extra"
 #define SQL_COUNTER_TABLE "counter"
 #define SQL_OPTION_TABLE "option"
 #define SQL_DOMAIN_TABLE "domain"
@@ -100,14 +101,16 @@
 #define SQL_PREPARED_STMT_INSERT_INTO_META_TABLE     "INSERT INTO " SQL_METADATA_TABLE " (`from`,`fromdomain`,`subject`,`spam`,`arrived`,`sent`,`retained`,`size`,`hlen`,`direction`,`attachments`,`piler_id`,`message_id`,`reference`,`digest`,`bodydigest`,`vcode`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 #define SQL_PREPARED_STMT_UPDATE_META_TABLE          "UPDATE " SQL_METADATA_TABLE " SET `from`=?,`fromdomain`=?,`subject`=?,`spam`=?,`arrived`=?,`sent`=?,`retained`=?,`size`=?,`hlen`=?,`direction`=?,`attachments`=?,`reference`=?,`digest`=?,`bodydigest`=?,`vcode`=? WHERE id=?"
 #define SQL_PREPARED_STMT_INSERT_INTO_ATTACHMENT_TABLE     "INSERT INTO " SQL_ATTACHMENT_TABLE " (`piler_id`,`attachment_id`,`sig`,`name`,`type`,`size`,`ptr`) VALUES(?,?,?,?,?,?,?)"
-#define SQL_PREPARED_STMT_GET_ATTACHMENT_ID_BY_SIGNATURE   "SELECT `id` FROM `" SQL_ATTACHMENT_TABLE "` WHERE `sig`=? AND `ptr`=0 AND `size`=?"
+#define SQL_PREPARED_STMT_GET_ATTACHMENT_ID_BY_SIGNATURE   "SELECT `id`, `piler_id`, `attachment_id` FROM `" SQL_ATTACHMENT_TABLE "` WHERE `sig`=? AND `size`=? AND `ptr`=0"
 #define SQL_PREPARED_STMT_GET_ATTACHMENT_POINTER     "SELECT `piler_id`, `attachment_id` FROM " SQL_ATTACHMENT_TABLE " WHERE id=?"
 #define SQL_PREPARED_STMT_QUERY_ATTACHMENT           "SELECT `attachment_id`, `ptr` FROM " SQL_ATTACHMENT_TABLE " WHERE piler_id=? ORDER BY attachment_id ASC"
 #define SQL_PREPARED_STMT_GET_FOLDER_ID              "SELECT `id` FROM " SQL_FOLDER_TABLE " WHERE `name`=? AND `parent_id`=?"
+#define SQL_PREPARED_STMT_GET_FOLDER_EXTRA_ID        "SELECT `id` FROM " SQL_FOLDER_EXTRA_TABLE " WHERE `name`=? AND `uid`=?"
 #define SQL_PREPARED_STMT_INSERT_INTO_FOLDER_TABLE   "INSERT INTO `" SQL_FOLDER_TABLE "` (`name`, `parent_id`) VALUES(?,?)"
+#define SQL_PREPARED_STMT_INSERT_INTO_FOLDER_EXTRA_TABLE   "INSERT INTO `" SQL_FOLDER_EXTRA_TABLE "` (`name`, `uid`) VALUES(?,?)"
 #define SQL_PREPARED_STMT_UPDATE_METADATA_REFERENCE  "UPDATE " SQL_METADATA_TABLE " SET reference=? WHERE message_id=? AND reference=''"
 #define SQL_PREPARED_STMT_GET_GUI_IMPORT_JOBS        "SELECT id, type, username, password, server FROM " SQL_IMPORT_TABLE " WHERE started=0 ORDER BY id LIMIT 0,1"
-#define SQL_PREPARED_STMT_INSERT_FOLDER_MESSAGE      "INSERT INTO " SQL_FOLDER_MESSAGE_TABLE " (`folder_id`, `id`) VALUES(?,?)"
+#define SQL_PREPARED_STMT_INSERT_FOLDER_MESSAGE      "INSERT INTO " SQL_FOLDER_MESSAGE_TABLE " (`folder_id`, `message_id`, `uid`) VALUES(?,?,?)"
 
 /* Error codes */
 
