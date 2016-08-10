@@ -279,15 +279,15 @@ create table if not exists `folder` (
 ) Engine=InnoDB;
 
 
-create table if not exists `folder_user` (
-   `id` bigint unsigned not null,
-   `uid` int unsigned not null,
-   key `folder_user_idx` (`id`),
-   key `folder_user_idx2` (`uid`)
+create table if not exists `folder_email` (
+   `uid` int unsigned not null auto_increment,
+   `email` char(128) not null unique,
+   key `folder_user_idx` (`uid`)
+   key `folder_user_idx2` (`email`)
 ) ENGINE=InnoDB;
 
 
-create table if not exists `folder_extra` (
+create table if not exists `folder_user` (
    `id` int unsigned not null auto_increment,
    `uid` int unsigned not null,
    `name` char(64) not null,
@@ -301,7 +301,7 @@ create table if not exists `folder_message` (
    `folder_id` bigint not null,
    `message_id` bigint not null,
    `uid` int not null,
-   unique(`folder_id`, `message_id`, `uid`),
+   unique(`message_id`, `uid`),
    key (`id`)
 ) ENGINE=InnoDB;
 

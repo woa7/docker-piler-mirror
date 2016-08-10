@@ -286,6 +286,7 @@ struct memcached_server {
 struct import {
    char *extra_recipient;
    char *move_folder;
+   char *email;
    int status;
    int total_messages;
    int processed_messages;

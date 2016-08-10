@@ -98,8 +98,8 @@ int import_message(char *filename, struct session_data *sdata, struct __data *da
          rc = process_message(sdata, &state, data, cfg);
 
       /*
-       * if pilerimport was invoked with --uid, and this is a duplicate,
-       * then add it to the folder_extra table
+       * if pilerimport was invoked with --email (then queried the matching uid!),
+       * and this is a duplicate, then add it to the folder_extra table
        */
 
       if(rc == ERR_EXISTS && data->import->uid > 0){

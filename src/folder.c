@@ -1,5 +1,5 @@
 /*
- * folder_extra.c, SJ
+ * folder.c, SJ
  */
 
 #include <stdio.h>
@@ -16,6 +16,33 @@
 #include <locale.h>
 #include <syslog.h>
 #include <piler.h>
+
+
+void get_folder_uid_by_email(struct session_data *sdata, struct __data *data){
+   int uid = 0;
+
+   data->import->uid = uid;
+
+   if(prepare_sql_statement(sdata, &(data->stmt_get_folder_id), SQL_PREPARED_STMT_GET_FOLDER_UID_BY_EMAIL) == ERR) return;
+
+   p_bind_init(data);
+   data->sql[data->pos] = data->import->email; data->type[data->pos] = TYPE_STRING; data->pos++;
+
+   if(p_exec_query(sdata, data->stmt_get_folder_id, data) == OK){
+      p_bind_init(data);
+      data->sql[data->pos] = (char *)&uid; data->type[data->pos] = TYPE_LONG; data->len[data->pos] = sizeof(unsigned long); data->pos++;
+
+      p_store_results(data->stmt_get_folder_id, data);
+      p_fetch_results(data->stmt_get_folder_id);
+      p_free_results(data->stmt_get_folder_id);
+   }
+
+   printf("uid=%d\n", uid);
+
+   close_prepared_statement(data->stmt_get_folder_id);
+
+   data->import->uid = uid;
+}
 
 
 int get_folder_extra_id(struct session_data *sdata, struct __data *data, char *foldername){
