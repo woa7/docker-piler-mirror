@@ -282,7 +282,7 @@ create table if not exists `folder` (
 create table if not exists `folder_email` (
    `uid` int unsigned not null auto_increment,
    `email` char(128) not null unique,
-   key `folder_user_idx` (`uid`)
+   key `folder_user_idx` (`uid`),
    key `folder_user_idx2` (`email`)
 ) ENGINE=InnoDB;
 

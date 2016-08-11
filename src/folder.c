@@ -18,6 +18,21 @@
 #include <piler.h>
 
 
+void insert_email_to_table(struct session_data *sdata, struct __data *data){
+   if(prepare_sql_statement(sdata, &(data->stmt_insert_into_folder_table), SQL_PREPARED_STMT_INSERT_INTO_FOLDER_EMAIL_TABLE) == ERR) return;
+
+   p_bind_init(data);
+
+   data->sql[data->pos] = data->import->email; data->type[data->pos] = TYPE_STRING; data->pos++;
+
+   if(p_exec_query(sdata, data->stmt_insert_into_folder_table, data) == OK){
+      data->import->uid = p_get_insert_id(data->stmt_insert_into_folder_table);
+   }
+
+   close_prepared_statement(data->stmt_insert_into_folder_table);
+}
+
+
 void get_folder_uid_by_email(struct session_data *sdata, struct __data *data){
    int uid = 0;
 
@@ -37,11 +52,10 @@ void get_folder_uid_by_email(struct session_data *sdata, struct __data *data){
       p_free_results(data->stmt_get_folder_id);
    }
 
-   printf("uid=%d\n", uid);
-
    close_prepared_statement(data->stmt_get_folder_id);
 
-   data->import->uid = uid;
+   if(uid > 0) data->import->uid = uid;
+   else insert_email_to_table(sdata, data);
 }
 
 
