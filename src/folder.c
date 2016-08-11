@@ -62,7 +62,7 @@ void get_folder_uid_by_email(struct session_data *sdata, struct __data *data){
 int get_folder_extra_id(struct session_data *sdata, struct __data *data, char *foldername){
    int id=ERR_FOLDER;
 
-   if(prepare_sql_statement(sdata, &(data->stmt_get_folder_id), SQL_PREPARED_STMT_GET_FOLDER_EXTRA_ID) == ERR) return id;
+   if(prepare_sql_statement(sdata, &(data->stmt_get_folder_id), SQL_PREPARED_STMT_GET_FOLDER_USER_ID) == ERR) return id;
 
    p_bind_init(data);
    data->sql[data->pos] = foldername; data->type[data->pos] = TYPE_STRING; data->pos++;
@@ -89,7 +89,7 @@ int add_new_folder_extra(struct session_data *sdata, struct __data *data, char *
 
    if(foldername == NULL) return id;
 
-   if(prepare_sql_statement(sdata, &(data->stmt_insert_into_folder_table), SQL_PREPARED_STMT_INSERT_INTO_FOLDER_EXTRA_TABLE) == ERR) return id;
+   if(prepare_sql_statement(sdata, &(data->stmt_insert_into_folder_table), SQL_PREPARED_STMT_INSERT_INTO_FOLDER_USER_TABLE) == ERR) return id;
 
    p_bind_init(data);
    data->sql[data->pos] = foldername; data->type[data->pos] = TYPE_STRING; data->pos++;
