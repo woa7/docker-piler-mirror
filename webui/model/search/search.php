@@ -106,7 +106,6 @@ class ModelSearchSearch extends Model {
 
       $session = Registry::get('session');
 
-
       $i = 0;
       while(list($k, $v) = each($data['match'])) {
          if($v == "@attachment_types") {
@@ -214,6 +213,19 @@ class ModelSearchSearch extends Model {
 
          $total_found = $query->total_found;
          $num_rows = $query->num_rows;
+      }
+      else if(isset($data['folder']) && $data['folder']) {
+         $folder_id = 0;
+
+         $folders = $session->get("folders");
+
+         $data['folder'] = trim($data['folder']);
+
+         if(isset($folders[$data['folder']])) {
+            $folder_id = $folders[$data['folder']];
+         }
+
+         $query = $this->sphx->query("SELECT id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id LIMIT 0,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
       }
       else if(isset($data['tag']) && $data['tag']) {
          list ($total_found, $num_rows, $id_list) = $this->get_sphinx_id_list($data['tag'], SPHINX_TAG_INDEX, 'tag', $page);
@@ -332,6 +344,7 @@ class ModelSearchSearch extends Model {
                     'folders'         => '',
                     'extra_folders'   => '',
                     'id'              => '',
+                    'folder'          => '',
                     'match'           => array()
       );
 
@@ -366,6 +379,7 @@ class ModelSearchSearch extends Model {
          else if($v == 'note:') { $token = 'note'; continue; }
          else if($v == 'ref:') { $token = 'ref'; continue; }
          else if($v == 'id:') { $token = 'id'; continue; }
+         else if($v == 'folder:') { $token = 'folder'; continue; }
          else if($token != 'date1' && $token != 'date2') {
             if(preg_match("/\d{4}\-\d{1,2}\-\d{1,2}/", $v) || preg_match("/\d{1,2}\/\d{1,2}\/\d{4}/", $v)) {
                $ndate++;
@@ -387,6 +401,7 @@ class ModelSearchSearch extends Model {
          else if($token == 'note') { $a['note'] .= ' ' . $v; }
          else if($token == 'ref') { $a['ref'] = ' ' . $v; }
          else if($token == 'id') { $a['id'] .= ' ' . $v; }
+         else if($token == 'folder') { $a['folder'] .= ' ' . $v; }
 
          else if($token == 'direction') {
             if($v == 'inbound') { $a['direction'] = "0"; }

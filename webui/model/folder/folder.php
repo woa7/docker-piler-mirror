@@ -93,6 +93,21 @@ class ModelFolderFolder extends Model {
    }
 
 
+   public function get_folder_names_for_user($email='') {
+      $arr = array();
+
+      $query = $this->db->query("SELECT folder_id, name FROM `" . TABLE_FOLDER . "` WHERE uid IN (SELECT uid FROM `" . TABLE_FOLDER_EMAIL . "` WHERE email=?)", array($email));
+
+      if(isset($query->rows)) {
+         foreach ($query->rows as $q) {
+            $arr[$q['name']] = $q['folder_id'];
+         }
+      }
+
+      return $arr;
+   }
+
+
    public function get_folder_id_array_for_user($uid = 0, $is_admin = 0) {
       $arr = array();
 
