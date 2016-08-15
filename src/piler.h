@@ -58,10 +58,7 @@ int file_from_archive_to_network(char *filename, int sd, int tls_enable, struct 
 
 int get_folder_id(struct session_data *sdata, struct __data *data, char *foldername, int parent_id);
 int add_new_folder(struct session_data *sdata, struct __data *data, char *foldername, int parent_id);
-
 void get_folder_uid_by_email(struct session_data *sdata, struct __data *data);
-int get_folder_extra_id(struct session_data *sdata, struct __data *data, char *foldername);
-int add_new_folder_extra(struct session_data *sdata, struct __data *data, char *foldername);
 
 int store_folder_id(struct session_data *sdata, struct __data *data, uint64 id);
 

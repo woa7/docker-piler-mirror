@@ -271,28 +271,20 @@ create table if not exists `domain_user` (
 
 
 create table if not exists `folder` (
-   `id` int not null auto_increment,
+   `folder_id` int not null auto_increment,
    `parent_id` int default 0,
+   `uid` int default 0,
    `name` char(64) not null,
-   unique(`parent_id`, `name`),
-   primary key (`id`)
+   unique(`uid`, `name`),
+   primary key (`folder_id`)
 ) Engine=InnoDB;
 
 
 create table if not exists `folder_email` (
    `uid` int unsigned not null auto_increment,
    `email` char(128) not null unique,
-   key `folder_user_idx` (`uid`),
-   key `folder_user_idx2` (`email`)
-) ENGINE=InnoDB;
-
-
-create table if not exists `folder_user` (
-   `id` int unsigned not null auto_increment,
-   `uid` int unsigned not null,
-   `name` char(64) not null,
-   unique(uid, name),
-   key (`id`)
+   key `folder_email_idx` (`uid`),
+   key `folder_email_idx2` (`email`)
 ) ENGINE=InnoDB;
 
 

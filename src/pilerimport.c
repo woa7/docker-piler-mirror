@@ -280,11 +280,6 @@ int main(int argc, char **argv){
 
    cfg = read_config(configfile);
 
-   if((data.recursive_folder_names == 1 || folder) && cfg.enable_folders == 0){
-      printf("please set enable_folders=1 in piler.conf to use the folder options\n");
-      return ERR;
-   }
-
    /* make sure we don't discard messages without a valid Message-Id when importing manually */
    cfg.archive_emails_not_having_message_id = 1;
 
@@ -305,25 +300,21 @@ int main(int argc, char **argv){
    memcached_init(&(data.memc), cfg.memcached_servers, 11211);
 #endif
 
-   if(folder){
-
+   if(folder || data.recursive_folder_names == 1){
       cfg.enable_folders = 1;
 
       if(data.import->email){
          get_folder_uid_by_email(&sdata, &data);
-
-         data.folder = get_folder_extra_id(&sdata, &data, folder);
-
-         if(data.folder == ERR_FOLDER){
-            data.folder = add_new_folder_extra(&sdata, &data, folder);
-         }
       }
-      else {
-         data.folder = get_folder_id(&sdata, &data, folder, 0);
+   }
 
-         if(data.folder == ERR_FOLDER){
-            data.folder = add_new_folder(&sdata, &data, folder, 0);
-         }
+
+   if(folder){
+
+      data.folder = get_folder_id(&sdata, &data, folder, 0);
+
+      if(data.folder == ERR_FOLDER){
+         data.folder = add_new_folder(&sdata, &data, folder, 0);
       }
 
       if(data.folder == ERR_FOLDER){
