@@ -30,6 +30,8 @@ class ModelSearchSearch extends Model {
       if($data['sort'] == "from") { $sort = "from"; }
       if($data['sort'] == "subj") { $sort = "subject"; }
 
+      if(isset($data['folder']) && $data['folder']) { $sort = "id"; }
+
       if($data['order'] == 1) { $order = "ASC"; }
 
       $sortorder = "ORDER BY `$sort` $order";
@@ -225,7 +227,7 @@ class ModelSearchSearch extends Model {
             $folder_id = $folders[$data['folder']];
          }
 
-         $query = $this->sphx->query("SELECT id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id LIMIT 0,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
+         $query = $this->sphx->query("SELECT id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id $sortorder LIMIT 0,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
       }
       else if(isset($data['tag']) && $data['tag']) {
          list ($total_found, $num_rows, $id_list) = $this->get_sphinx_id_list($data['tag'], SPHINX_TAG_INDEX, 'tag', $page);
