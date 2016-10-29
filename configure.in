@@ -41,6 +41,7 @@ have_psql="no"
 have_tre="no"
 have_zip="no"
 have_zlib="no"
+have_zstd="no"
 have_tcpwrappers="no"
 have_tweak_sent_time="no"
 
@@ -169,6 +170,10 @@ dnl libzip
 AC_CHECK_HEADERS(zip.h, have_zip=yes, echo "zip.h is not found")
 AC_CHECK_LIB([zip],[main],[AC_CHECK_LIB(zip, zip_open, have_zip=yes, echo "libzip.so is not found"; have_zip=no)],[],[])ac_cv_lib_zip=ac_cv_lib_zip_main
 
+dnl check zstd library
+
+AC_CHECK_HEADERS(zstd.h, have_zstd=yes, have_zstd=no)
+AC_CHECK_LIB([zstd],[main],[AC_CHECK_LIB(zstd, ZSTD_compress, have_zstd=yes, echo "libzstd.so is not found"; have_zstd=no)],[],[])ac_cv_lib_z=ac_cv_lib_zstd_main
 
 dnl zlib
 
@@ -432,6 +437,12 @@ if test "$have_tre" = "yes"; then
    echo "tre library: yes"
    defs="$defs -DHAVE_TRE"
    antispam_libs="$antispam_libs -ltre"
+fi
+
+if test "$have_zstd" = "yes"; then
+   echo "zstd library: yes"
+   AC_DEFINE_UNQUOTED(HAVE_ZSTD, 1, [libzstd support])
+   antispam_libs="$antispam_libs -lzstd"
 fi
 
 if test "$have_zip" = "yes"; then

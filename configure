@@ -3443,6 +3443,7 @@ have_psql="no"
 have_tre="no"
 have_zip="no"
 have_zlib="no"
+have_zstd="no"
 have_tcpwrappers="no"
 have_tweak_sent_time="no"
 
@@ -4146,6 +4147,96 @@ fi
 ac_cv_lib_zip=ac_cv_lib_zip_main
 
 
+for ac_header in zstd.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "zstd.h" "ac_cv_header_zstd_h" "$ac_includes_default"
+if test "x$ac_cv_header_zstd_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ZSTD_H 1
+_ACEOF
+ have_zstd=yes
+else
+  have_zstd=no
+fi
+
+done
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lzstd" >&5
+$as_echo_n "checking for main in -lzstd... " >&6; }
+if ${ac_cv_lib_zstd_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lzstd  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_zstd_main=yes
+else
+  ac_cv_lib_zstd_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_zstd_main" >&5
+$as_echo "$ac_cv_lib_zstd_main" >&6; }
+if test "x$ac_cv_lib_zstd_main" = xyes; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ZSTD_compress in -lzstd" >&5
+$as_echo_n "checking for ZSTD_compress in -lzstd... " >&6; }
+if ${ac_cv_lib_zstd_ZSTD_compress+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lzstd  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ZSTD_compress ();
+int
+main ()
+{
+return ZSTD_compress ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_zstd_ZSTD_compress=yes
+else
+  ac_cv_lib_zstd_ZSTD_compress=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_zstd_ZSTD_compress" >&5
+$as_echo "$ac_cv_lib_zstd_ZSTD_compress" >&6; }
+if test "x$ac_cv_lib_zstd_ZSTD_compress" = xyes; then :
+  have_zstd=yes
+else
+  echo "libzstd.so is not found"; have_zstd=no
+fi
+
+fi
+ac_cv_lib_z=ac_cv_lib_zstd_main
+
 
 for ac_header in zlib.h
 do :
@@ -4714,6 +4805,16 @@ if test "$have_tre" = "yes"; then
    echo "tre library: yes"
    defs="$defs -DHAVE_TRE"
    antispam_libs="$antispam_libs -ltre"
+fi
+
+if test "$have_zstd" = "yes"; then
+   echo "zstd library: yes"
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_ZSTD 1
+_ACEOF
+
+   antispam_libs="$antispam_libs -lzstd"
 fi
 
 if test "$have_zip" = "yes"; then

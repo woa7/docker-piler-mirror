@@ -13,8 +13,12 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <syslog.h>
+#ifdef HAVE_ZSTD
+   #include <zstd.h>
+#else
+   #include <zlib.h>
+#endif
 #include <piler.h>
-#include <zlib.h>
 #include <openssl/blowfish.h>
 #include <openssl/evp.h>
 #include <errno.h>
@@ -43,8 +47,13 @@ int store_file(struct session_data *sdata, char *filename, int len, struct __con
    int ret=0, rc, fd, n;
    char *addr, *p, *p0, *p1, *p2, s[SMALLBUFSIZE];
    struct stat st;
-   Bytef *z=NULL;
+#ifdef HAVE_ZSTD
+   void *dst;
+   size_t dstlen;
+#else
+   Bytef *dst=NULL;
    uLongf dstlen;
+#endif
 
    EVP_CIPHER_CTX ctx;
    unsigned char *outbuf=NULL;
@@ -80,23 +89,43 @@ int store_file(struct session_data *sdata, char *filename, int len, struct __con
 
    if(addr == MAP_FAILED) return ret;
 
+   rc = OK;
+
+#ifdef HAVE_ZSTD
+   dstlen = ZSTD_compressBound(len);
+   dst = malloc(dstlen);
+
+   if(dst == NULL){
+      munmap(addr, len);
+      syslog(LOG_PRIORITY, "%s: cannot malloc for zstd buffer", sdata->ttmpfile);
+      return ret;
+   }
+
+   size_t const cSize = ZSTD_compress(dst, destlen, addr, len, 1);
+   if(ZSTD_isError(cSize)){
+      syslog(LOG_PRIORITY, "%s: error zstd compressing: %s", sdata->ttmpfile, ZSTD_getErrorName(cSize));
+      rc = ERR;
+   }
+#else
    dstlen = compressBound(len);
+   dst = malloc(dstlen);
 
-   z = malloc(dstlen);
-
-   if(z == NULL){
+   if(dst == NULL){
       munmap(addr, len);
       syslog(LOG_PRIORITY, "%s: cannot malloc for z buffer", sdata->ttmpfile);
       return ret;
    }
 
-   rc = compress(z, &dstlen, (const Bytef *)addr, len);
+   if(compress(dst, &dstlen, (const Bytef *)addr, len) != Z_OK)
+      rc = ERR;
+#endif
+
    gettimeofday(&tv2, &tz);
    sdata->__compress += tvdiff(tv2, tv1);
 
    munmap(addr, len);
 
-   if(rc != Z_OK) goto ENDE;
+   if(rc == ERR) goto ENDE;
 
    if(cfg->encrypt_messages == 1){
       gettimeofday(&tv1, &tz);
@@ -107,7 +136,7 @@ int store_file(struct session_data *sdata, char *filename, int len, struct __con
       outbuf = malloc(dstlen + EVP_MAX_BLOCK_LENGTH);
       if(outbuf == NULL) goto ENDE;
 
-      if(!EVP_EncryptUpdate(&ctx, outbuf, &outlen, z, dstlen)) goto ENDE;
+      if(!EVP_EncryptUpdate(&ctx, outbuf, &outlen, dst, dstlen)) goto ENDE;
       if(!EVP_EncryptFinal_ex(&ctx, outbuf + outlen, &tmplen)) goto ENDE;
       outlen += tmplen;
       EVP_CIPHER_CTX_cleanup(&ctx);
@@ -161,7 +190,7 @@ int store_file(struct session_data *sdata, char *filename, int len, struct __con
       writelen = outlen;
    }
    else {
-      n = write(fd, z, dstlen);
+      n = write(fd, dst, dstlen);
       writelen = dstlen;
    }
 
@@ -185,7 +214,7 @@ int store_file(struct session_data *sdata, char *filename, int len, struct __con
 
 ENDE:
    if(outbuf) free(outbuf);
-   if(z) free(z);
+   if(dst) free(dst);
 
    return ret;
 }
