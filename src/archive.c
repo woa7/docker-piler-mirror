@@ -135,6 +135,7 @@ int inf(unsigned char *in, int len, int mode, char **buffer, FILE *dest){
 }
 
 
+#ifdef HAVE_ZSTD
 int zstd_inf(unsigned char *in, int len, int mode, char **buffer, FILE *dest){
    size_t dSize;
    unsigned long long const rSize = ZSTD_getDecompressedSize(in, len);
@@ -171,7 +172,7 @@ int zstd_inf(unsigned char *in, int len, int mode, char **buffer, FILE *dest){
 
    return Z_OK;
 }
-
+#endif
 
 
 int retrieve_file_from_archive(char *filename, int mode, char **buffer, FILE *dest, struct __config *cfg){
@@ -235,8 +236,9 @@ int retrieve_file_from_archive(char *filename, int mode, char **buffer, FILE *de
       tlen += olen;
 
       if(st.st_size > 4){
-         memcpy(&magic, addr, 4);
       #ifdef HAVE_ZSTD
+         memcpy(&magic, addr, 4);
+
          if(magic == ZSTD_DETECTED_MAGICNUMBER){
             rc = zstd_inf(s, tlen, mode, buffer, dest);
          }
