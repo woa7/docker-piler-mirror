@@ -20,6 +20,10 @@
 #include <assert.h>
 #include <piler.h>
 
+#ifdef HAVE_ZSTD
+   #include <zstd.h>
+#endif
+
 
 
 void zerr(int ret){
@@ -131,12 +135,53 @@ int inf(unsigned char *in, int len, int mode, char **buffer, FILE *dest){
 }
 
 
+int zstd_inf(unsigned char *in, int len, int mode, char **buffer, FILE *dest){
+   size_t dSize;
+   unsigned long long const rSize = ZSTD_getDecompressedSize(in, len);
+
+   if(rSize == 0)
+      return Z_DATA_ERROR;
+
+   if(mode == WRITE_TO_STDOUT){
+      void* const rBuff = malloc((size_t)rSize);
+      if(!rBuff) return Z_MEM_ERROR;
+
+      dSize = ZSTD_decompress(rBuff, rSize, in, len);
+
+      if(dSize != rSize){
+         printf("error decoding buffer: %s\n", ZSTD_getErrorName(dSize));
+         return Z_DATA_ERROR;
+      }
+
+      fwrite(rBuff, 1, dSize, dest);
+
+      free(rBuff);
+   }
+   else {
+      *buffer = malloc((size_t)rSize);
+      if(!*buffer) return Z_MEM_ERROR;
+      memset(*buffer, 0, rSize);
+
+      dSize = ZSTD_decompress(*buffer, rSize, in, len);
+      if(dSize != rSize){
+         printf("error decoding buffer: %s\n", ZSTD_getErrorName(dSize));
+         return Z_DATA_ERROR;
+      }
+   }
+
+   return Z_OK;
+}
+
+
+
 int retrieve_file_from_archive(char *filename, int mode, char **buffer, FILE *dest, struct __config *cfg){
    int rc=0, n, olen, tlen, len, fd=-1;
    unsigned char *s=NULL, *addr=NULL, inbuf[REALLYBIGBUFSIZE];
    struct stat st;
    EVP_CIPHER_CTX ctx;
-
+#ifdef HAVE_ZSTD
+   unsigned long magic;
+#endif
 
    if(filename == NULL) return 1;
 
@@ -188,11 +233,39 @@ int retrieve_file_from_archive(char *filename, int mode, char **buffer, FILE *de
 
 
       tlen += olen;
-      rc = inf(s, tlen, mode, buffer, dest);
+
+      if(st.st_size > 4){
+         memcpy(&magic, addr, 4);
+      #ifdef HAVE_ZSTD
+         if(magic == ZSTD_DETECTED_MAGICNUMBER){
+            rc = zstd_inf(s, tlen, mode, buffer, dest);
+         }
+         else {
+      #endif
+            rc = inf(s, tlen, mode, buffer, dest);
+      #ifdef HAVE_ZSTD
+         }
+      #endif
+      }
    }
    else {
       addr = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-      rc = inf(addr, st.st_size, mode, buffer, dest);
+
+      if(st.st_size > 4){
+      #ifdef HAVE_ZSTD
+         memcpy(&magic, addr, 4);
+
+         if(magic == ZSTD_DETECTED_MAGICNUMBER){
+            rc = zstd_inf(addr, st.st_size, mode, buffer, dest);
+         }
+         else {
+      #endif
+            rc = inf(addr, st.st_size, mode, buffer, dest);
+      #ifdef HAVE_ZSTD
+         }
+      #endif
+      }
+
       munmap(addr, st.st_size);
    }
 

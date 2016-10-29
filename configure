@@ -4809,12 +4809,18 @@ fi
 
 if test "$have_zstd" = "yes"; then
    echo "zstd library: yes"
+   antispam_libs="$antispam_libs -lzstd"
+   defs="$defs -DHAVE_ZSTD"
+
+   if test "$(which zstd)" = ""; then echo "Error: cannot find the zstd binary"; exit 1; fi
+
+   zstd_magic=$(echo this is a test | zstd | hexdump -C | awk '/00000000/{print "ntohl(0x"$2$3$4$5 ")"}')
+
 
 cat >>confdefs.h <<_ACEOF
-#define HAVE_ZSTD 1
+#define ZSTD_DETECTED_MAGICNUMBER $zstd_magic
 _ACEOF
 
-   antispam_libs="$antispam_libs -lzstd"
 fi
 
 if test "$have_zip" = "yes"; then

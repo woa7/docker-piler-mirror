@@ -97,22 +97,24 @@ int store_file(struct session_data *sdata, char *filename, int len, struct __con
 
    if(dst == NULL){
       munmap(addr, len);
-      syslog(LOG_PRIORITY, "%s: cannot malloc for zstd buffer", sdata->ttmpfile);
+      syslog(LOG_PRIORITY, "%s: ERROR: cannot malloc for zstd buffer", sdata->ttmpfile);
       return ret;
    }
 
-   size_t const cSize = ZSTD_compress(dst, destlen, addr, len, 1);
+   size_t const cSize = ZSTD_compress(dst, dstlen, addr, len, 1);
    if(ZSTD_isError(cSize)){
-      syslog(LOG_PRIORITY, "%s: error zstd compressing: %s", sdata->ttmpfile, ZSTD_getErrorName(cSize));
+      syslog(LOG_PRIORITY, "%s: ERROR: zstd compressing: %s", sdata->ttmpfile, ZSTD_getErrorName(cSize));
       rc = ERR;
    }
+
+   dstlen = cSize;
 #else
    dstlen = compressBound(len);
    dst = malloc(dstlen);
 
    if(dst == NULL){
       munmap(addr, len);
-      syslog(LOG_PRIORITY, "%s: cannot malloc for z buffer", sdata->ttmpfile);
+      syslog(LOG_PRIORITY, "%s: ERROR: cannot malloc for z buffer", sdata->ttmpfile);
       return ret;
    }
 

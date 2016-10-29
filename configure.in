@@ -441,8 +441,14 @@ fi
 
 if test "$have_zstd" = "yes"; then
    echo "zstd library: yes"
-   AC_DEFINE_UNQUOTED(HAVE_ZSTD, 1, [libzstd support])
    antispam_libs="$antispam_libs -lzstd"
+   defs="$defs -DHAVE_ZSTD"
+
+   if test "$(which zstd)" = ""; then echo "Error: cannot find the zstd binary"; exit 1; fi
+
+   zstd_magic=$(echo this is a test | zstd | hexdump -C | awk '/00000000/{print "ntohl(0x"$2$3$4$5 ")"}')
+
+   AC_DEFINE_UNQUOTED(ZSTD_DETECTED_MAGICNUMBER, $zstd_magic, [detected zstd magic number])
 fi
 
 if test "$have_zip" = "yes"; then
