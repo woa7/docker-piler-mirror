@@ -235,7 +235,7 @@ int retrieve_file_from_archive(char *filename, int mode, char **buffer, FILE *de
 
       tlen += olen;
 
-      if(st.st_size > 4){
+      if(tlen > 4){
       #ifdef HAVE_ZSTD
          memcpy(&magic, addr, 4);
 
