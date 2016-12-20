@@ -104,7 +104,7 @@
 #define SQL_PREPARED_STMT_GET_ATTACHMENT_ID_BY_SIGNATURE   "SELECT `id`, `piler_id`, `attachment_id` FROM `" SQL_ATTACHMENT_TABLE "` WHERE `sig`=? AND `ptr`=0 AND `size`=?"
 #define SQL_PREPARED_STMT_GET_ATTACHMENT_POINTER     "SELECT `piler_id`, `attachment_id` FROM " SQL_ATTACHMENT_TABLE " WHERE id=?"
 #define SQL_PREPARED_STMT_QUERY_ATTACHMENT           "SELECT `attachment_id`, `ptr` FROM " SQL_ATTACHMENT_TABLE " WHERE piler_id=? ORDER BY attachment_id ASC"
-#define SQL_PREPARED_STMT_GET_FOLDER_ID              "SELECT `id` FROM " SQL_FOLDER_TABLE " WHERE `name`=? AND `uid`=? AND `parent_id`=?"
+#define SQL_PREPARED_STMT_GET_FOLDER_ID              "SELECT `folder_id` FROM " SQL_FOLDER_TABLE " WHERE `name`=? AND `uid`=? AND `parent_id`=?"
 #define SQL_PREPARED_STMT_GET_FOLDER_UID_BY_EMAIL    "SELECT `uid` FROM " SQL_FOLDER_EMAIL_TABLE " WHERE `email`=?"
 #define SQL_PREPARED_STMT_INSERT_INTO_FOLDER_TABLE   "INSERT INTO `" SQL_FOLDER_TABLE "` (`uid`, `name`, `parent_id`) VALUES(?,?,?)"
 #define SQL_PREPARED_STMT_INSERT_INTO_FOLDER_EMAIL_TABLE   "INSERT INTO `" SQL_FOLDER_EMAIL_TABLE "` (`email`) VALUES(?)"
