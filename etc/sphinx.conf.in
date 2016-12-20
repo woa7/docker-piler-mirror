@@ -86,6 +86,14 @@ source att : base
    sql_attr_uint = mid
 }
 
+source folder : base
+{
+   sql_query_pre = SET NAMES utf8
+   sql_query = select id, folder_id, message_id, uid FROM folder_message
+
+   sql_attr_uint = uid
+   sql_attr_uint = folder_id
+}
 
 index main1
 {
@@ -189,7 +197,7 @@ index note1
 index att1
 {
         source                  = att
-        path                    = /var/piler/sphinx/att1
+        path                    = LOCALSTATEDIR/piler/sphinx/att1
         docinfo                 = extern
         dict                    = keywords
         min_prefix_len          = 6
@@ -198,6 +206,15 @@ index att1
         ngram_chars             = U+1100..U+2FA1F
 }
 
+index folder1
+{
+        source                  = folder
+        path                    = LOCALSTATEDIR/piler/sphinx/folder1
+        docinfo                 = extern
+        dict                    = keywords
+        min_prefix_len          = 6
+        min_word_len            = 1
+}
 
 indexer
 {

@@ -50,6 +50,7 @@ void usage(){
    printf("    -f <imap folder>                  IMAP folder name to import\n");
    printf("    -g <imap folder>                  Move email after import to this IMAP folder\n");
    printf("    -F <folder>                       Piler folder name to assign to this import\n");
+   printf("    --email <email@address>           Email address to assign to this import\n");
    printf("    -R                                Assign IMAP folder names as Piler folder names\n");
    printf("    -b <batch limit>                  Import only this many emails\n");
    printf("    -s <start position>               Start importing POP3 emails from this position\n");
@@ -87,6 +88,8 @@ int main(int argc, char **argv){
    import.start_position = 1;
    import.download_only = 0;
    import.timeout = 30;
+   import.uid = 0;
+   import.email = NULL;
 
    data.import = &import;
 
@@ -113,6 +116,7 @@ int main(int argc, char **argv){
             {"skiplist",     required_argument,  0,  'x' },
             {"folder",       required_argument,  0,  'F' },
             {"folder_imap",  required_argument,  0,  'f' },
+            {"email",        required_argument,  0,  'E' },
             {"add-recipient",required_argument,  0,  'a' },
             {"batch-limit",  required_argument,  0,  'b' },
             {"timeout",      required_argument,  0,  't' },
@@ -130,9 +134,9 @@ int main(int argc, char **argv){
 
       int option_index = 0;
 
-      c = getopt_long(argc, argv, "c:m:M:e:d:i:K:u:p:P:x:F:f:a:b:t:s:g:GDRroqh?", long_options, &option_index);
+      c = getopt_long(argc, argv, "c:m:M:e:d:i:K:u:p:P:x:F:f:a:b:t:s:g:E:GDRroqh?", long_options, &option_index);
 #else
-      c = getopt(argc, argv, "c:m:M:e:d:i:K:u:p:P:x:F:f:a:b:t:s:g:GDRroqh?");
+      c = getopt(argc, argv, "c:m:M:e:d:i:K:u:p:P:x:F:f:a:b:t:s:g:E:GDRroqh?");
 #endif
 
       if(c == -1) break;
@@ -175,6 +179,10 @@ int main(int argc, char **argv){
 
          case 'u' :
                     username = optarg;
+                    break;
+
+         case 'E' :
+                    data.import->email = optarg;
                     break;
 
          case 'p' :
@@ -266,11 +274,6 @@ int main(int argc, char **argv){
 
    cfg = read_config(configfile);
 
-   if((data.recursive_folder_names == 1 || folder) && cfg.enable_folders == 0){
-      printf("please set enable_folders=1 in piler.conf to use the folder options\n");
-      return ERR;
-   }
-
    /* make sure we don't discard messages without a valid Message-Id when importing manually */
    cfg.archive_emails_not_having_message_id = 1;
 
@@ -293,7 +296,17 @@ int main(int argc, char **argv){
    memcached_init(&(data.memc), cfg.memcached_servers, 11211);
 #endif
 
+   if(folder || data.recursive_folder_names == 1){
+      cfg.enable_folders = 1;
+
+      if(data.import->email){
+         get_folder_uid_by_email(&sdata, &data);
+      }
+   }
+
+
    if(folder){
+
       data.folder = get_folder_id(&sdata, &data, folder, 0);
 
       if(data.folder == ERR_FOLDER){
@@ -305,7 +318,6 @@ int main(int argc, char **argv){
          close_database(&sdata);
          return 0;
       }
-
    }
 
    load_rules(&sdata, &data, data.archiving_rules, SQL_ARCHIVING_RULE_TABLE);

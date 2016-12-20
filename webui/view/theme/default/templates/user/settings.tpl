@@ -34,7 +34,7 @@
 
 <?php } ?>
 	 
-<?php if(ENABLE_FOLDER_RESTRICTIONS == 1) { ?>
+<?php if($folders) { ?>
 	 
 	 <tr>
 		<td><?php print $text_folders; ?>:</td>

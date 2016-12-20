@@ -140,6 +140,7 @@ void remove_recipients(struct session_data *sdata, uint64 id){
 
 int store_folder_id(struct session_data *sdata, struct __data *data, uint64 id){
    int rc = ERR;
+   int uid0 = 0;
 
    if(data->folder == ERR_FOLDER) return rc;
 
@@ -149,6 +150,12 @@ int store_folder_id(struct session_data *sdata, struct __data *data, uint64 id){
 
    data->sql[data->pos] = (char *)&data->folder; data->type[data->pos] = TYPE_LONGLONG; data->pos++;
    data->sql[data->pos] = (char *)&id; data->type[data->pos] = TYPE_LONGLONG; data->pos++;
+   if(sdata->import == 1){
+      data->sql[data->pos] = (char *)&(data->import->uid); data->type[data->pos] = TYPE_LONG; data->pos++;
+   }
+   else {
+      data->sql[data->pos] = (char *)&uid0; data->type[data->pos] = TYPE_LONG; data->pos++;
+   }
 
    if(p_exec_query(sdata, data->stmt_insert_into_folder_message_table, data) == OK) rc = OK;
    close_prepared_statement(data->stmt_insert_into_folder_message_table);

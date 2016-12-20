@@ -63,6 +63,7 @@
 #define RULE_MATCH 1
 #define RULE_NO_MATCH -100
 
+#define DEDUP_HINT_SIZE RND_STR_LEN+20
 
 typedef void signal_func (int);
 
@@ -83,6 +84,7 @@ struct attachment {
    char filename[TINYBUFSIZE];
    char internalname[TINYBUFSIZE];
    char digest[2*DIGEST_LENGTH+1];
+   char dedup_hint[DEDUP_HINT_SIZE];
    char dumped;
 };
 
@@ -284,6 +286,7 @@ struct memcached_server {
 struct import {
    char *extra_recipient;
    char *move_folder;
+   char *email;
    int status;
    int total_messages;
    int processed_messages;
@@ -295,6 +298,7 @@ struct import {
    int keep_eml;
    int timeout;
    int cap_uidplus;
+   int uid;
    long total_size;
    time_t started, updated, finished;
 };

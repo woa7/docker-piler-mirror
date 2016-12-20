@@ -41,8 +41,8 @@ class ControllerUserSettings extends Controller {
 
       $auditgroups = preg_replace("/\n/", ", ", $this->model_group_group->get_groups_by_email($session->get("emails")));
 
-      $folders = $session->get("folders");
-  
+      $folders = array_keys($session->get("folders"));
+
       foreach ($folders as $r) {
          $auditfolders .= ', ' . $r;
       }

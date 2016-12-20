@@ -15,6 +15,9 @@ class ModelUserAuth extends Model {
       $session->set("auditdomains", $data['auditdomains']);
       $session->set("emails", $data['emails']);
 
+      //$data['folders'] = $this->model_folder_folder->get_folder_id_array_for_user($query->row['uid'], $data['admin_user']);
+      $data['folders'] = $this->model_folder_folder->get_folder_names_for_user($data['email']);
+
       $session->set("folders", $data['folders']);
    }
 
@@ -123,8 +126,6 @@ class ModelUserAuth extends Model {
 
          $extra_emails = $this->model_user_user->get_email_addresses_from_groups($data['emails']);
          $data['emails'] = array_merge($data['emails'], $extra_emails);
-
-         $data['folders'] = $this->model_folder_folder->get_folder_id_array_for_user($query->row['uid'], $data['admin_user']);
 
          $session->set("auth_data", $data);
 
