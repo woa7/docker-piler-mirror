@@ -443,6 +443,12 @@ int list_folders(int sd, int *seq, int use_ssl, char *folder_name, struct __data
    // trim the "A3 OK LIST completed" trailer off
    if(p) *p = '\0';
 
+   // No folder list, so this must be a leaf folder
+   if(strlen(buf) == 0){
+      addnode(data->imapfolders, folder_name);
+      return OK;
+   }
+
    memset(attrs, 0, sizeof(attrs));
 
    p = buf;
