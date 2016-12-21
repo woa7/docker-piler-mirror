@@ -93,7 +93,7 @@ END:
 }
 
 
-int process_imap_folder(int sd, int *seq, char *folder, struct session_data *sdata, struct __data *data, int use_ssl, int dryrun, struct __config *cfg){
+int process_imap_folder(int sd, int *seq, char *folder, char *main_folder, struct session_data *sdata, struct __data *data, int use_ssl, int dryrun, struct __config *cfg){
    int rc=ERR, i, n, messages=0, len, readlen, fd, nreads, readpos, finished, msglen, msg_written_len, tagoklen, tagbadlen, result;
    char *p, tag[SMALLBUFSIZE], tagok[SMALLBUFSIZE], tagbad[SMALLBUFSIZE], buf[MAXBUFSIZE], puf[MAXBUFSIZE], filename[SMALLBUFSIZE];
 
@@ -127,6 +127,12 @@ int process_imap_folder(int sd, int *seq, char *folder, struct session_data *sda
 
 
    if(data->recursive_folder_names == 1){
+
+      // trim the main folder name from the stored value in folder table
+      if(data->import->trim_folder_name == 1 && main_folder){
+         folder += strlen(main_folder);
+      }
+
       data->folder = get_folder_id(sdata, data, folder, 0);
       if(data->folder == ERR_FOLDER) data->folder = add_new_folder(sdata, data, folder, 0);
    }
@@ -410,8 +416,10 @@ int list_folders(int sd, int *seq, int use_ssl, char *folder_name, struct __data
    snprintf(tag, sizeof(tag)-1, "A%d", *seq); snprintf(tagok, sizeof(tagok)-1, "A%d OK", (*seq)++);
    if(folder_name == NULL)
       snprintf(puf, sizeof(puf)-1, "%s LIST \"\" \"*\"\r\n", tag);
-   else
+   else {
+      data->import->trim_folder_name = 1;
       snprintf(puf, sizeof(puf)-1, "%s LIST \"%s\" \"*\"\r\n", tag, folder_name);
+   }
 
    write1(sd, puf, strlen(puf), use_ssl, data->ssl);
 

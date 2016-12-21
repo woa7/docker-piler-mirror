@@ -89,6 +89,7 @@ int main(int argc, char **argv){
    import.download_only = 0;
    import.timeout = 30;
    import.uid = 0;
+   import.trim_folder_name = 0;
    import.email = NULL;
 
    data.import = &import;

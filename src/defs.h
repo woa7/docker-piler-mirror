@@ -298,6 +298,7 @@ struct import {
    int keep_eml;
    int timeout;
    int cap_uidplus;
+   int trim_folder_name;
    int uid;
    long total_size;
    time_t started, updated, finished;

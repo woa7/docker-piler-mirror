@@ -85,7 +85,7 @@ int import_from_imap_server(char *server, char *username, char *password, int po
             else {
                if(data->quiet == 0) printf("processing folder: %s... ", (char *)q->str);
 
-               if(process_imap_folder(sd, &seq, q->str, sdata, data, use_ssl, dryrun, cfg) == ERR) ret = ERR;
+               if(process_imap_folder(sd, &seq, q->str, folder_imap, sdata, data, use_ssl, dryrun, cfg) == ERR) ret = ERR;
             }
 
          }
