@@ -129,7 +129,7 @@ int process_imap_folder(int sd, int *seq, char *folder, char *main_folder, struc
    if(data->recursive_folder_names == 1){
 
       // trim the main folder name from the stored value in folder table
-      if(data->import->trim_folder_name == 1 && main_folder){
+      if(data->import->trim_folder_name == 1 && main_folder && strlen(main_folder) < strlen(folder)){
          folder += strlen(main_folder);
       }
 
