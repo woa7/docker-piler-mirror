@@ -227,7 +227,9 @@ class ModelSearchSearch extends Model {
             $folder_id = $folders[$data['folder']];
          }
 
-         $query = $this->sphx->query("SELECT id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id $sortorder LIMIT 0,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
+         $query = $this->sphx->query("SELECT id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
+         $total_found = $query->total_found;
+         $num_rows = $query->num_rows;
       }
       else if(isset($data['tag']) && $data['tag']) {
          list ($total_found, $num_rows, $id_list) = $this->get_sphinx_id_list($data['tag'], SPHINX_TAG_INDEX, 'tag', $page);
