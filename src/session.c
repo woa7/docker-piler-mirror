@@ -428,7 +428,7 @@ void process_written_file(struct session_ctx *sctx){
 
 #ifdef HAVE_ANTIVIRUS
    if(sctx->cfg->use_antivirus == 1){
-      sctx->sdata->rav = do_av_check(sctx->sdata, &virusinfo[0], sctx->data, sctx->cfg);
+      sctx->sdata->rav = do_av_check(sctx->sdata, sctx->virusinfo, sctx->data, sctx->cfg);
    }
 #endif
 
@@ -467,7 +467,6 @@ void process_written_file(struct session_ctx *sctx){
 
 void process_data(struct session_ctx *sctx){
    char *arule = NULL;
-   char virusinfo[SMALLBUFSIZE];
 
    sctx->inj = ERR;
    sctx->status = S_STATUS_UNDEF;
@@ -483,7 +482,7 @@ void process_data(struct session_ctx *sctx){
          sctx->inj = OK;
       }
       else if(AVIR_VIRUS == sctx->sdata->rav){
-         syslog(LOG_PRIORITY, "%s: found virus: %s", sctx->sdata->ttmpfile, virusinfo);
+         syslog(LOG_PRIORITY, "%s: found virus: %s", sctx->sdata->ttmpfile, sctx->virusinfo);
          sctx->counters->c_virus++;
          sctx->inj = OK;
       } else if(strlen(sctx->sdata->bodydigest) < 10) {

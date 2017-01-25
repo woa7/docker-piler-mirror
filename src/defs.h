@@ -373,6 +373,7 @@ struct counters {
 
 
 struct session_ctx {
+   char virusinfo[SMALLBUFSIZE];
    char *status;
    int new_sd;
    int db_conn;
