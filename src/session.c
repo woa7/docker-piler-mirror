@@ -485,6 +485,7 @@ void process_data(struct session_ctx *sctx){
          syslog(LOG_PRIORITY, "%s: found virus: %s", sctx->sdata->ttmpfile, sctx->virusinfo);
          sctx->counters->c_virus++;
          sctx->inj = OK;
+         sctx->status = S_STATUS_DISCARDED;
       } else if(strlen(sctx->sdata->bodydigest) < 10) {
          syslog(LOG_PRIORITY, "%s: invalid digest", sctx->sdata->ttmpfile);
          sctx->inj = ERR;
