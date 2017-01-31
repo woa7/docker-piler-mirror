@@ -604,7 +604,7 @@ void translateLine(unsigned char *p, struct parser_state *state){
          if(*p == '\'' && prev == '"') { *p = ' '; }
          if(*p == '\'' && *(p+1) == '"'){ *p = ' '; }
 
-         if(*p == '_' || *p == '\'' || *p == '&'){ continue; }
+         if(*p == '_' || *p == '\'' || *p == '&' || *p == '+'){ continue; }
 
          prev = *p;
       }

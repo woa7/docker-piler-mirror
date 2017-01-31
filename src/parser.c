@@ -172,10 +172,10 @@ void storno_attachment(struct parser_state *state){
 
 
 int parse_line(char *buf, struct parser_state *state, struct session_data *sdata, int take_into_pieces, char *writebuffer, int writebuffersize, char *abuffer, int abuffersize, struct __data *data, struct __config *cfg){
-   char *p, *q, puf[SMALLBUFSIZE];
+   char *p, *q, *r, puf[SMALLBUFSIZE];
    unsigned char b64buffer[MAXBUFSIZE];
    char tmpbuf[MAXBUFSIZE];
-   int n64, writelen, boundary_line=0, result;
+   int n, n64, writelen, boundary_line=0, result;
    unsigned int len;
 
    if(cfg->debug == 1) printf("line: %s", buf);
@@ -739,8 +739,20 @@ int parse_line(char *buf, struct parser_state *state, struct session_data *sdata
 
             /* skip any address matching ...@cfg->hostid, 2013.10.29, SJ */
             q = strchr(puf, '@');
-            if(q && strncmp(q+1, cfg->hostid, cfg->hostid_len) == 0){
-               continue;
+            if(q){
+               if(strncmp(q+1, cfg->hostid, cfg->hostid_len) == 0){
+                  continue;
+               }
+
+               /* fix aaa+bbb@ccc.fu address to aaa@ccc.fu, 2017.01.31, SJ */
+
+               r = strchr(puf, '+');
+               if(r){
+                  n = strlen(q);
+                  memmove(r, q, n);
+                  *(r+n) = '\0';
+                  q = r;
+               }
             }
 
             addnode(state->rcpt, puf);
@@ -748,6 +760,7 @@ int parse_line(char *buf, struct parser_state *state, struct session_data *sdata
             state->tolen += len;
 
             if(does_it_seem_like_an_email_address(puf) == 1){
+
                if(is_email_address_on_my_domains(puf, data) == 1) sdata->internal_recipient = 1;
                else sdata->external_recipient = 1;
 
