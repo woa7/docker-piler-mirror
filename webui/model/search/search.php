@@ -217,7 +217,7 @@ class ModelSearchSearch extends Model {
          $num_rows = $query->num_rows;
       }
       else if(isset($data['folder']) && $data['folder']) {
-         $folder_id = 0;
+         $folder_id = -1;
 
          $folders = $session->get("folders");
 
@@ -227,7 +227,7 @@ class ModelSearchSearch extends Model {
             $folder_id = $folders[$data['folder']];
          }
 
-         $query = $this->sphx->query("SELECT id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
+         $query = $this->sphx->query("SELECT message_id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
          $total_found = $query->total_found;
          $num_rows = $query->num_rows;
       }
@@ -259,6 +259,7 @@ class ModelSearchSearch extends Model {
       if(isset($query->rows)) {
          foreach($query->rows as $a) {
             if(isset($a['mid'])) { array_push($ids, $a['mid']); }
+            else if(isset($a['message_id'])) { array_push($ids, $a['message_id']); }
             else { array_push($ids, $a['id']); }
 
             if($q) { $q .= ",?"; }
