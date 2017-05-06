@@ -13,7 +13,7 @@
 
 #define VERSION "1.2.0"
 
-#define BUILD 953
+#define BUILD 954
 
 #define HOSTID "mailarchiver"
 
@@ -39,6 +39,7 @@
 #define BUFLEN 32
 #define IPLEN 16+1
 #define KEYLEN 56
+#define MIN_EMAIL_ADDRESS_LEN 9
 
 #define CRLF "\n"
 
