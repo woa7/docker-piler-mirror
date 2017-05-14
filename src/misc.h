@@ -44,7 +44,7 @@ void strtolower(char *s);
 
 void *get_in_addr(struct sockaddr *sa);
 
-int can_i_write_current_directory();
+int can_i_write_directory(char *dir);
 
 #ifndef _GNU_SOURCE
    char *strcasestr(const char *s, const char *find);

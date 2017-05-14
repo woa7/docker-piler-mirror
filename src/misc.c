@@ -609,11 +609,14 @@ void *get_in_addr(struct sockaddr *sa){
 }
 
 
-int can_i_write_current_directory(){
+int can_i_write_directory(char *dir){
    int fd;
    char filename[SMALLBUFSIZE];
 
-   snprintf(filename, sizeof(filename)-1, "__piler_%d", getpid());
+   if(dir)
+      snprintf(filename, sizeof(filename)-1, "%s/__piler_%d", dir, getpid());
+   else
+      snprintf(filename, sizeof(filename)-1, "__piler_%d", getpid());
 
    fd = open(filename, O_CREAT|O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP);
    if(fd == -1){
