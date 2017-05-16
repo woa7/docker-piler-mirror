@@ -81,8 +81,6 @@ class ModelSearchSearch extends Model {
          else { return ""; }
       }
 
-      if(ENABLE_FOLDER_RESTRICTIONS == 1) { return ""; }
-
       $all_your_addresses = $this->get_all_your_address();
       return " (@from $all_your_addresses | @to $all_your_addresses) ";
    }
@@ -90,9 +88,9 @@ class ModelSearchSearch extends Model {
 
    private function get_results($data = array(), $sort = 'sent', $order = 'DESC', $sortorder = '', $page = 0) {
       $ids = array();
-      $__folders = array();
+      $folders = $search_folders = array();
       $match = '';
-      $direction = $attachment = $size = $folders = '';
+      $direction = $attachment = $size = '';
       $tag_id_list = '';
       $a = "";
       $id = "";
@@ -190,18 +188,13 @@ class ModelSearchSearch extends Model {
 
 
       if(ENABLE_FOLDER_RESTRICTIONS == 1) {
+         $folders = $session->get("folders");
+
          $s = explode(" ", $data['folders']);
          while(list($k,$v) = each($s)) {
-            if(in_array($v, $session->get("folders"))) {
-               array_push($__folders, $v);
+            if(in_array($v, $folders)) {
+               array_push($search_folders, $v);
             }
-         }
-
-         if(count($__folders) > 0) {
-            $folders = "folder IN (" . implode(",", $__folders) . ") AND ";
-         }
-         else {
-            $folders = "folder IN (" . implode(",", $session->get("folders")) . ") AND ";
          }
       }
 
@@ -216,16 +209,8 @@ class ModelSearchSearch extends Model {
          $total_found = $query->total_found;
          $num_rows = $query->num_rows;
       }
-      else if(isset($data['folder']) && $data['folder']) {
-         $folder_id = -1;
-
-         $folders = $session->get("folders");
-
-         $data['folder'] = trim($data['folder']);
-
-         if(isset($folders[$data['folder']])) {
-            $folder_id = $folders[$data['folder']];
-         }
+      else if(ENABLE_FOLDER_RESTRICTIONS == 1 && count($search_folders) > 0) {
+         $q2 = "?" . str_repeat(",?", count($search_folders)-1);
 
          if($data['match']) {
 
@@ -243,13 +228,15 @@ class ModelSearchSearch extends Model {
             }
 
             // run a final query to filter which messages are in this folder
-            $q = "?" . str_repeat(",?", count($f_bag)-1);
-            array_push($f_bag, $folder_id);
-            
-            $query = $this->db->query("SELECT id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id in ($q) AND folder_id=?", $f_bag);
+            $q1 = "?" . str_repeat(",?", count($f_bag)-1);
+            $f_bag = array_merge($f_bag, $search_folders);
+
+            $query = $this->db->query("SELECT id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
+
+            if(LOG_LEVEL >= NORMAL) { syslog(LOG_INFO, sprintf("sql query: '%s' in %.2f s, %d hits", $query->query, $query->exec_time, $query->num_rows)); }
          }
          else {
-            $query = $this->sphx->query("SELECT message_id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
+            $query = $this->sphx->query("SELECT message_id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id IN ($q2) $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS, $search_folders);
          }
 
          $total_found = $query->total_found;
@@ -262,13 +249,8 @@ class ModelSearchSearch extends Model {
          list ($total_found, $num_rows, $id_list) = $this->get_sphinx_id_list($data['note'], SPHINX_NOTE_INDEX, 'note', $page);
          $query = $this->sphx->query("SELECT id FROM " . SPHINX_MAIN_INDEX . " WHERE $folders id IN ($id_list) $sortorder LIMIT 0,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
       }
-      else if(ENABLE_FOLDER_RESTRICTIONS == 1 && isset($data['extra_folders']) && strlen($data['extra_folders']) > 0) {
-         $query = $this->sphx->query("SELECT id FROM " . SPHINX_MAIN_INDEX . " WHERE $a $id $date $attachment $direction $size folder IN (" . preg_replace("/ /", ",", $data['extra_folders']) . ") AND MATCH('$match') $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
-         $total_found = $query->total_found;
-         $num_rows = $query->num_rows;
-      }
       else {
-         $query = $this->sphx->query("SELECT id FROM " . SPHINX_MAIN_INDEX . " WHERE $a $id $date $attachment $direction $size $folders MATCH('$match') $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
+         $query = $this->sphx->query("SELECT id FROM " . SPHINX_MAIN_INDEX . " WHERE $a $id $date $attachment $direction $size MATCH('$match') $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
          $total_found = $query->total_found;
          $num_rows = $query->num_rows;
       }
@@ -330,14 +312,6 @@ class ModelSearchSearch extends Model {
       foreach($query->rows as $q) {
          if($this->check_your_permission_by_id($q['id'])) {
             array_push($ids, $q['id']);
-         }
-      }
-
-      if(ENABLE_FOLDER_RESTRICTIONS == 1) {
-         $query = $this->sphx->query("SELECT id, folder FROM " . SPHINX_MAIN_INDEX . " WHERE id IN (" . implode(",", $ids) . ")");
-         $ids = array();
-         foreach($query->rows as $q) {
-            if(isset($q['folder']) && in_array($q['folder'], $session->get("folders"))) { array_push($ids, $q['id']); }
          }
       }
 
@@ -761,19 +735,13 @@ class ModelSearchSearch extends Model {
 
       $arr = array_merge($arr, $a, $a);
 
-      if(ENABLE_FOLDER_RESTRICTIONS == 1) {
-         $query = $this->sphx->query("SELECT folder FROM " . SPHINX_MAIN_INDEX . " WHERE id=" . (int)$id);
-         if(isset($query->row['folder']) && in_array($query->row['folder'], $session->get("folders"))) { return 1; }
+      if(Registry::get('auditor_user') == 1 && RESTRICTED_AUDITOR == 1) {
+         $query = $this->db->query("SELECT id FROM " . VIEW_MESSAGES . " WHERE id=? AND ( `fromdomain` IN ($q) OR `todomain` IN ($q) )", $arr);
+      } else {
+         $query = $this->db->query("SELECT id FROM " . VIEW_MESSAGES . " WHERE id=? AND ( `from` IN ($q) OR `to` IN ($q) )", $arr);
       }
-      else {
-         if(Registry::get('auditor_user') == 1 && RESTRICTED_AUDITOR == 1) {
-            $query = $this->db->query("SELECT id FROM " . VIEW_MESSAGES . " WHERE id=? AND ( `fromdomain` IN ($q) OR `todomain` IN ($q) )", $arr);
-         } else {
-            $query = $this->db->query("SELECT id FROM " . VIEW_MESSAGES . " WHERE id=? AND ( `from` IN ($q) OR `to` IN ($q) )", $arr);
-         }
 
-         if(isset($query->row['id'])) { return 1; }
-      }
+      if(isset($query->row['id'])) { return 1; }
 
       return 0;
    }
@@ -832,34 +800,26 @@ class ModelSearchSearch extends Model {
       }
       else {
 
-         if(ENABLE_FOLDER_RESTRICTIONS == 1) {
-            $query = $this->sphx->query("SELECT id, folder FROM " . SPHINX_MAIN_INDEX . " WHERE id IN (" . implode(",", $id) . ")");
-         }
-         else {
-            $arr = array_merge($arr, $a, $a);
-            if(Registry::get('auditor_user') == 1 && RESTRICTED_AUDITOR == 1) {
-               $query = $this->db->query("SELECT id FROM `" . VIEW_MESSAGES . "` WHERE `id` IN ($q2) AND ( `fromdomain` IN ($q) OR `todomain` IN ($q) )", $arr);
-            } else {
+         $arr = array_merge($arr, $a, $a);
+         if(Registry::get('auditor_user') == 1 && RESTRICTED_AUDITOR == 1) {
+            $query = $this->db->query("SELECT id FROM `" . VIEW_MESSAGES . "` WHERE `id` IN ($q2) AND ( `fromdomain` IN ($q) OR `todomain` IN ($q) )", $arr);
+         } else {
 
-               $query = $this->db->query("SELECT id FROM " . TABLE_PRIVATE . " WHERE `id` IN ($q2)", $id);
-               if($query->num_rows > 0) {
-                  foreach ($query->rows as $r) {
-                     array_push($parr, $r['id']);
-                  }
+            $query = $this->db->query("SELECT id FROM " . TABLE_PRIVATE . " WHERE `id` IN ($q2)", $id);
+            if($query->num_rows > 0) {
+               foreach ($query->rows as $r) {
+                  array_push($parr, $r['id']);
                }
-
-               $query = $this->db->query("SELECT id FROM `" . VIEW_MESSAGES . "` WHERE `id` IN ($q2) AND ( `from` IN ($q) OR `to` IN ($q) )", $arr);
             }
 
+            $query = $this->db->query("SELECT id FROM `" . VIEW_MESSAGES . "` WHERE `id` IN ($q2) AND ( `from` IN ($q) OR `to` IN ($q) )", $arr);
          }
+
       }
 
       if($query->num_rows > 0) {
          foreach ($query->rows as $q) {
-            if(ENABLE_FOLDER_RESTRICTIONS == 1) {
-               if(in_array($q['folder'], $session->get("folders"))) { array_push($result, $q['id']); }
-            }
-            else if(!in_array($q['id'], $result) && !in_array($q['id'], $parr)) {
+            if(!in_array($q['id'], $result) && !in_array($q['id'], $parr)) {
                array_push($result, $q['id']);
             }
          }

@@ -1669,7 +1669,7 @@ html,body{height:auto !important;height:100%;min-height:100%;}
 #searchcontainer #button_audit{width:100%;}
 #searchcontainer #button_search,#searchcontainer #button_options{width:30%;}
 #mainscreen{position:absolute;top:120px;right:20px;bottom:20px;left:20px;min-width:320px;z-index:0;}
-#mailleftcontainer{position:absolute;top:0;left:0;bottom:0;width:195px;}
+#mailleftcontainer{position:absolute;top:0;left:0;bottom:0;width:195px;border:1px solid #999999;}
 #mailboxlist-container{position:absolute;top:0;left:0;width:100%;bottom:0;border:1px solid #999999;border-top:none;background-color:#f9f9f9;overflow:auto;}
 .boxlistcontent{position:absolute;top:0px;bottom:34px;left:0;right:0;width:100%;overflow-y:auto;overflow-x:hidden;height:auto;}
 .boxfooter{position:absolute;bottom:0px;left:0px;right:0px;overflow:hidden;height:33px;border-top:1px solid #ccc;background-color:#f6f6f6;min-width:320px;}
