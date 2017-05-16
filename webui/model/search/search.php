@@ -227,9 +227,32 @@ class ModelSearchSearch extends Model {
             $folder_id = $folders[$data['folder']];
          }
 
-         $query = $this->sphx->query("SELECT message_id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
+         if($data['match']) {
+
+            // run a query to figure out how many total hits we have
+            $query = $this->sphx->query("SELECT id FROM " . SPHINX_MAIN_INDEX . " WHERE MATCH('$match')");
+
+            // if there are more hits than $pagelen, then run a 2nd query to get all of these hits
+            if($total_found > $pagelen){
+               $query = $this->sphx->query("SELECT id FROM " . SPHINX_MAIN_INDEX . " WHERE MATCH('$match') OPTION max_matches=" . (int)$query->num_rows);
+            }
+
+            $f_bag = array();
+            foreach($query->rows as $q) {
+               array_push($f_bag, $q['id']);
+            }
+
+            // run a final query to filter which messages are in this folder
+            $q = "?" . str_repeat(",?", count($f_bag)-1);
+            array_push($f_bag, $folder_id);
+            
+            $query = $this->db->query("SELECT id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id in ($q) AND folder_id=?", $f_bag);
+         }
+         else {
+            $query = $this->sphx->query("SELECT message_id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id=$folder_id $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS);
+         }
+
          $total_found = $query->total_found;
-         $num_rows = $query->num_rows;
       }
       else if(isset($data['tag']) && $data['tag']) {
          list ($total_found, $num_rows, $id_list) = $this->get_sphinx_id_list($data['tag'], SPHINX_TAG_INDEX, 'tag', $page);
