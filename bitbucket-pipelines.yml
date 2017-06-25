@@ -24,3 +24,5 @@ pipelines:
             - echo "grant all privileges on piler.* to piler@localhost identified by 'verystrongpassword'" | mysql -u root
             - echo "flush privileges" | mysql -u root
             - mysql -u piler -pverystrongpassword piler < /usr/share/piler/db-mysql.sql
+            - cd unit_tests
+            - ./run.sh
