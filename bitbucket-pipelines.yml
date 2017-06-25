@@ -17,5 +17,10 @@ pipelines:
     bbpl:
       - step:
           script:
+            - service mysql start
             - ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --with-database=mariadb --enable-tcpwrappers
-            - make clean all
+            - make clean all install
+            - echo "create database piler character set 'utf8mb4'" | mysql -u root -pabcde123
+            - echo "grant all privileges on piler.* to piler@localhost identified by 'verystrongpassword'" | mysql -u root -pabcde123
+            - echo "flush privileges" | mysql -u root -pabcde123
+            - mysql -u piler -pverystrongpassword piler < /usr/share/piler/db-mysql.sql
