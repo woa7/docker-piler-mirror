@@ -18,3 +18,4 @@ pipelines:
       - step:
           script:
             - ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --with-database=mariadb --enable-tcpwrappers
+            - make clean all
