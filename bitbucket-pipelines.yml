@@ -21,8 +21,8 @@ pipelines:
             - ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --with-database=mariadb --enable-tcpwrappers
             - make clean all install
             - echo "create database piler character set 'utf8mb4'" | mysql -u root
-            - echo "grant all privileges on piler.* to piler@localhost identified by 'verystrongpassword'" | mysql -u root
+            - echo "grant all privileges on piler.* to piler@localhost identified by 'piler123'" | mysql -u root
             - echo "flush privileges" | mysql -u root
-            - mysql -u piler -pverystrongpassword piler < /usr/share/piler/db-mysql.sql
+            - mysql -u piler -ppiler123 piler < /usr/share/piler/db-mysql.sql
             - cd unit_tests
             - ./run.sh
