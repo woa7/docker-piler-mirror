@@ -265,7 +265,11 @@ int init_ssl(){
    SSL_library_init();
    SSL_load_error_strings();
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
    data.ctx = SSL_CTX_new(TLSv1_server_method());
+#else
+   data.ctx = SSL_CTX_new(TLS_server_method());
+#endif
 
    if(data.ctx == NULL){ syslog(LOG_PRIORITY, "SSL_CTX_new() failed"); return ERR; }
 
