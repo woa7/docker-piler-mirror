@@ -1,1 +1,3 @@
 mime/mime.types: MIME types from the apache 2.2.x distribution
+import/rewrite.pl: https://bitbucket.org/jsuto/piler/issues/815/pst-mailer-daemon-to-cc-issues-fix
+import/import.pl: https://bitbucket.org/jsuto/piler/issues/818/import-ldap-rename-script
