@@ -196,6 +196,7 @@ class ModelSearchSearch extends Model {
                array_push($search_folders, $v);
             }
          }
+         array_push($search_folders, 0);
       }
 
 
@@ -231,7 +232,8 @@ class ModelSearchSearch extends Model {
             $q1 = "?" . str_repeat(",?", count($f_bag)-1);
             $f_bag = array_merge($f_bag, $search_folders);
 
-            $query = $this->db->query("SELECT id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
+            //$query = $this->db->query("SELECT id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
+            $query = $this->db->query("SELECT DISTINCT message_id AS id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
 
             if(LOG_LEVEL >= NORMAL) { syslog(LOG_INFO, sprintf("sql query: '%s' in %.2f s, %d hits", $query->query, $query->exec_time, $query->num_rows)); }
          }
