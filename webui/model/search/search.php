@@ -223,19 +223,21 @@ class ModelSearchSearch extends Model {
                $query = $this->sphx->query("SELECT id FROM " . SPHINX_MAIN_INDEX . " WHERE MATCH('$match') OPTION max_matches=" . (int)$query->num_rows);
             }
 
-            $f_bag = array();
-            foreach($query->rows as $q) {
-               array_push($f_bag, $q['id']);
+            if(count($search_folders) > 1) {
+               $f_bag = array();
+               foreach($query->rows as $q) {
+                  array_push($f_bag, $q['id']);
+               }
+
+               // run a final query to filter which messages are in this folder
+               $q1 = "?" . str_repeat(",?", count($f_bag)-1);
+               $f_bag = array_merge($f_bag, $search_folders);
+
+               //$query = $this->db->query("SELECT id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
+               $query = $this->db->query("SELECT DISTINCT message_id AS id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
+
+               if(LOG_LEVEL >= NORMAL) { syslog(LOG_INFO, sprintf("sql query: '%s' in %.2f s, %d hits", $query->query, $query->exec_time, $query->num_rows)); }
             }
-
-            // run a final query to filter which messages are in this folder
-            $q1 = "?" . str_repeat(",?", count($f_bag)-1);
-            $f_bag = array_merge($f_bag, $search_folders);
-
-            //$query = $this->db->query("SELECT id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
-            $query = $this->db->query("SELECT DISTINCT message_id AS id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
-
-            if(LOG_LEVEL >= NORMAL) { syslog(LOG_INFO, sprintf("sql query: '%s' in %.2f s, %d hits", $query->query, $query->exec_time, $query->num_rows)); }
          }
          else {
             $query = $this->sphx->query("SELECT message_id FROM " . SPHINX_FOLDER_INDEX . " WHERE folder_id IN ($q2) $sortorder LIMIT $offset,$pagelen OPTION max_matches=" . MAX_SEARCH_HITS, $search_folders);
