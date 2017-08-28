@@ -232,14 +232,18 @@ class ModelSearchSearch extends Model {
             $f_bag = array_merge($f_bag, $search_folders);
 
             $query = $this->db->query("SELECT DISTINCT message_id AS id FROM " . TABLE_FOLDER_MESSAGE . " WHERE message_id IN ($q1) AND folder_id IN ($q2)", $f_bag);
+            $total_found = $query->num_rows;
 
             if(LOG_LEVEL >= NORMAL) { syslog(LOG_INFO, sprintf("sql query: '%s' in %.2f s, %d hits", $query->query, $query->exec_time, $query->num_rows)); }
          }
          else {
+            // count how many emails we have in this folder
+            $query = $this->db->query("SELECT COUNT(*) AS num FROM " .  TABLE_FOLDER_MESSAGE . " WHERE folder_id IN ($q2)", $search_folders);
+            $total_found = $query->row['num'];
+
             $query = $this->db->query("SELECT message_id AS id FROM " .  TABLE_FOLDER_MESSAGE . " WHERE folder_id IN ($q2) LIMIT $offset,$pagelen", $search_folders);
          }
 
-         $total_found = $query->total_found;
       }
       else if(isset($data['tag']) && $data['tag']) {
          list ($total_found, $num_rows, $id_list) = $this->get_sphinx_id_list($data['tag'], SPHINX_TAG_INDEX, 'tag', $page);
