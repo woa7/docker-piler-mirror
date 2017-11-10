@@ -247,6 +247,8 @@ void child_main(struct child *ptr){
 
    if(cfg.verbosity >= _LOG_DEBUG) syslog(LOG_PRIORITY, "child (pid: %d, serial: %d) started main() working on '%s'", getpid(), ptr->serial, dir);
 
+   data.child_serial = ptr->serial;
+
    while(1){
       if(received_sighup == 1){
          if(cfg.verbosity >= _LOG_DEBUG) syslog(LOG_PRIORITY, "child (pid: %d) caught HUP signal", getpid());
