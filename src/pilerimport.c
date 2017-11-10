@@ -76,6 +76,7 @@ int main(int argc, char **argv){
    srand(getpid());
 
    data.folder = 0;
+   data.child_serial = 0;
    data.recursive_folder_names = 0;
    data.quiet = 0;
 

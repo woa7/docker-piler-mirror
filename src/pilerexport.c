@@ -571,7 +571,7 @@ int main(int argc, char **argv){
    if(read_key(&cfg)) p_clean_exit(ERR_READING_KEY, 1);
 
 
-   init_session_data(&sdata, &cfg);
+   init_session_data(&sdata, 0, &cfg);
 
 
    if(open_database(&sdata, &cfg) == ERR){
@@ -581,7 +581,7 @@ int main(int argc, char **argv){
 
    if(where_condition){
 
-      init_session_data(&sdata2, &cfg);
+      init_session_data(&sdata2, 0, &cfg);
 
       strcpy(cfg.mysqlhost, "127.0.0.1");
       cfg.mysqlport = 9306;

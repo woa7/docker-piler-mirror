@@ -110,7 +110,7 @@ int process_email(char *filename, struct session_data *sdata, struct data *data,
    }
 #endif
 
-   init_session_data(sdata, cfg);
+   init_session_data(sdata, data->child_serial, cfg);
 
    sdata->tot_len = size;
 
@@ -247,7 +247,7 @@ void child_main(struct child *ptr){
 
    if(cfg.verbosity >= _LOG_DEBUG) syslog(LOG_PRIORITY, "child (pid: %d, serial: %d) started main() working on '%s'", getpid(), ptr->serial, dir);
 
-   data.child_serial = ptr->serial;
+   data.child_serial = ptr->serial % 255;
 
    while(1){
       if(received_sighup == 1){

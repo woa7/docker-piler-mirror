@@ -331,13 +331,13 @@ void make_random_string(char *buf, int buflen){
 }
 
 
-void create_id(char *id, unsigned char server_id){
+void create_id(char *id, unsigned char server_id, unsigned char child_serial){
    int i;
    unsigned char buf[RND_STR_LEN/2];
 
    memset(id, 0, SMALLBUFSIZE);
 
-   get_random_bytes(buf, RND_STR_LEN/2, server_id);
+   get_random_bytes(buf, RND_STR_LEN/2, server_id, child_serial);
 
    for(i=0; i < RND_STR_LEN/2; i++){
       sprintf(id, "%02x", buf[i]);
@@ -351,7 +351,7 @@ void create_id(char *id, unsigned char server_id){
  * reading from pool
  */
 
-int get_random_bytes(unsigned char *buf, int len, unsigned char server_id){
+int get_random_bytes(unsigned char *buf, int len, unsigned char server_id, unsigned char child_serial){
    int fd, ret=0;
    struct taia now;
    char nowpack[TAIA_PACK];
@@ -367,8 +367,9 @@ int get_random_bytes(unsigned char *buf, int len, unsigned char server_id){
    if(fd == -1) return ret;
 
    *(buf + 12) = server_id;
+   *(buf + 14) = child_serial;
 
-   if(readFromEntropyPool(fd, buf+12+1, len-12-1) != len-12-1){
+   if(readFromEntropyPool(fd, buf+14+1, len-14-1) != len-14-1){
       syslog(LOG_PRIORITY, "%s: %s", ERR_CANNOT_READ_FROM_POOL, RANDOM_POOL);
    }
    
@@ -544,13 +545,13 @@ int drop_privileges(struct passwd *pwd){
 }
 
 
-void init_session_data(struct session_data *sdata, struct config *cfg){
+void init_session_data(struct session_data *sdata, unsigned char child_serial, struct config *cfg){
    int i;
 
 
    sdata->fd = -1;
 
-   create_id(&(sdata->ttmpfile[0]), cfg->server_id);
+   create_id(&(sdata->ttmpfile[0]), cfg->server_id, child_serial);
    unlink(sdata->ttmpfile);
 
    snprintf(sdata->filename, SMALLBUFSIZE-1, "%s", sdata->ttmpfile);

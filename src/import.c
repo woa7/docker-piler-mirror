@@ -26,7 +26,7 @@ int import_message(struct session_data *sdata, struct data *data, struct config 
    struct counters counters;
 
 
-   init_session_data(sdata, cfg);
+   init_session_data(sdata, 0, cfg);
 
    if(data->import->extra_recipient){
       snprintf(sdata->rcptto[0], SMALLBUFSIZE-1, "%s", data->import->extra_recipient);

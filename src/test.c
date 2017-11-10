@@ -73,7 +73,7 @@ int main(int argc, char **argv){
    load_rules(&sdata, &data, data.folder_rules, SQL_FOLDER_RULE_TABLE);
 
 
-   init_session_data(&sdata, &cfg);
+   init_session_data(&sdata, 0, &cfg);
  
    sdata.delivered = 0;
    sdata.tot_len = st.st_size;

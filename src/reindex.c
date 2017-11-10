@@ -234,7 +234,7 @@ int main(int argc, char **argv){
    initrules(data.retention_rules);
    initrules(data.folder_rules);
 
-   init_session_data(&sdata, &cfg);
+   init_session_data(&sdata, 0, &cfg);
 
 
    if(open_database(&sdata, &cfg) == ERR){

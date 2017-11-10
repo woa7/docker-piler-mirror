@@ -338,7 +338,7 @@ struct data {
    struct import *import;
    struct licence licence;
    char *dedup;
-   int child_serial;
+   unsigned char child_serial;
    int pos;
 
 #ifdef HAVE_TRE
