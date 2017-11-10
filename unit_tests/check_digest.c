@@ -86,7 +86,7 @@ static void test_make_digests(struct config *cfg){
          continue;
       }
 
-      init_session_data(&sdata, cfg);
+      init_session_data(&sdata, 0, cfg);
  
       sdata.delivered = 0;
       sdata.tot_len = st.st_size;
