@@ -367,9 +367,9 @@ int get_random_bytes(unsigned char *buf, int len, unsigned char server_id, unsig
    if(fd == -1) return ret;
 
    *(buf + 12) = server_id;
-   *(buf + 14) = child_serial;
+   *(buf + 13) = child_serial;
 
-   if(readFromEntropyPool(fd, buf+14+1, len-14-1) != len-14-1){
+   if(readFromEntropyPool(fd, buf+13+1, len-13-1) != len-13-1){
       syslog(LOG_PRIORITY, "%s: %s", ERR_CANNOT_READ_FROM_POOL, RANDOM_POOL);
    }
    
