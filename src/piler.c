@@ -130,6 +130,13 @@ int process_email(char *filename, struct session_data *sdata, struct data *data,
    parser_state = parse_message(sdata, 1, data, cfg);
    post_parse(sdata, &parser_state, cfg);
 
+
+   if(cfg->archive_only_mydomains == 1 && sdata->internal_sender == 0 && sdata->internal_recipient == 0){
+      syslog(LOG_PRIORITY, "%s: discarding: not on mydomains, message-id=%s", sdata->ttmpfile, parser_state.message_id);
+      return ERR_DISCARDED;
+   }
+
+
    if(cfg->syslog_recipients == 1){
       rcpt = parser_state.b_to;
       do {
