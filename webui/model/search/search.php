@@ -96,8 +96,7 @@ class ModelSearchSearch extends Model {
       $id = "";
       $offset = 0;
       $total_sphx_hits = $num_rows = 0;
-      $fields = array("@(subject,body)", "@from", "@to", "@subject", "@body", "@attachment_types");
-
+      $fields = array("@(subject,body)", FROM_TOKEN, "@to", "@subject", "@body", "@attachment_types");
 
       $pagelen = get_page_length();
       $offset = $page * $pagelen;
@@ -128,7 +127,7 @@ class ModelSearchSearch extends Model {
 
             if(substr($v, 0, 1) == "@") {
                $v = substr($v, 1, strlen($v)-1);
-               if($data['match'][$i-1] == "@from") { $data['match'][$i-1] = "@fromdomain"; }
+               if($data['match'][$i-1] == FROM_TOKEN) { $data['match'][$i-1] = "@fromdomain"; }
                if($data['match'][$i-1] == "@to") { $data['match'][$i-1] = "@todomain"; }
             }
 

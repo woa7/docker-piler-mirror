@@ -43,6 +43,7 @@ install:
 	$(INSTALL) -m 0755 $(srcdir)/import.sh $(DESTDIR)$(libexecdir)/piler
 	$(INSTALL) -m 0755 $(srcdir)/purge.sh $(DESTDIR)$(libexecdir)/piler
 	$(INSTALL) -m 0755 $(srcdir)/pilerpurge.py $(DESTDIR)$(libexecdir)/piler
+	$(INSTALL) -m 0755 $(srcdir)/rtindex.py $(DESTDIR)$(libexecdir)/piler
 	$(INSTALL) -m 0755 $(srcdir)/postinstall.sh $(DESTDIR)$(libexecdir)/piler
 	$(INSTALL) -m 0755 $(srcdir)/watch_sphinx_main_index.sh $(DESTDIR)$(libexecdir)/piler
 

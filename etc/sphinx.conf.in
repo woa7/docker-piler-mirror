@@ -15,47 +15,6 @@ source base
    sql_attr_uint = attachments
 }
 
-source delta : base
-{
-   sql_query_pre = SET NAMES utf8mb4
-   sql_query_pre  = REPLACE INTO sph_counter SELECT 1, IFNULL(MAX(id), 0) FROM sph_index
-   sql_query_post_index  = DELETE FROM sph_index WHERE id<=(SELECT max_doc_id FROM sph_counter WHERE counter_id=1)
-   sql_query = SELECT id, `from`, `to`, `fromdomain`, `todomain`, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index \
-        WHERE id <= (SELECT max_doc_id FROM sph_counter WHERE counter_id=1)
-
-   sql_query_killlist = SELECT `id` FROM `metadata` WHERE `deleted`=1
-}
-
-source main1 : base
-{
-   sql_query_pre = SET NAMES utf8mb4
-   sql_query = SELECT id, `from`, `to`, `fromdomain`, `todomain`, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
-}
-
-source main2 : base
-{
-   sql_query_pre = SET NAMES utf8mb4
-   sql_query = SELECT id, `from`, `to`, `fromdomain`, `todomain`, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
-}
-
-source main3 : base
-{
-   sql_query_pre = SET NAMES utf8mb4
-   sql_query = SELECT id, `from`, `to`, `fromdomain`, `todomain`, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
-}
-
-source main4 : base
-{
-   sql_query_pre = SET NAMES utf8mb4
-   sql_query = SELECT id, `from`, `to`, `fromdomain`, `todomain`, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
-}
-
-source dailydelta : base
-{
-   sql_query_pre = SET NAMES utf8mb4
-   sql_query = SELECT id, `from`, `to`, `fromdomain`, `todomain`, `subject`, `arrived`, `sent`, `body`, `size`, `direction`, `folder`, `attachments`, `attachment_types` FROM sph_index WHERE id=-1
-}
-
 source tag : base
 {
    sql_query_pre = SET NAMES utf8mb4
@@ -75,90 +34,6 @@ source note : base
    sql_attr_uint = uid
 
 }
-
-source att : base
-{
-
-   sql_query_pre = SET NAMES utf8mb4
-   sql_query  =  select a.id as aid, m.id as mid, a.name AS aname, a.size, REPLACE(REPLACE(m.`from`, '@', 'X'), '.', 'X') as `from`, REPLACE(REPLACE((select group_concat(rcpt.`to` ORDER BY `to` ASC SEPARATOR ' ') from rcpt where rcpt.id=mid group by rcpt.id), '@', 'X'), '.', 'X') as `to` from attachment a, metadata m where m.piler_id=a.piler_id
-
-   sql_attr_uint = size
-   sql_attr_uint = mid
-}
-
-
-index main1
-{
-	source			= main1
-	path			= LOCALSTATEDIR/piler/sphinx/main1
-	docinfo			= extern
-	dict			= keywords
-        min_prefix_len          = 5
-        min_word_len            = 1
-        #ngram_len               = 1
-        #ngram_chars             = U+3000..U+2FA1F
-}
-
-index main2
-{
-        source                  = main2
-        path                    = LOCALSTATEDIR/piler/sphinx/main2
-        docinfo                 = extern
-	dict			= keywords
-        min_prefix_len          = 5
-        min_word_len            = 1
-        #ngram_len               = 1
-        #ngram_chars             = U+3000..U+2FA1F
-}
-
-index main3
-{
-        source                  = main3
-        path                    = LOCALSTATEDIR/piler/sphinx/main3
-        docinfo                 = extern
-	dict			= keywords
-        min_prefix_len          = 5
-        min_word_len            = 1
-        #ngram_len               = 1
-        #ngram_chars             = U+3000..U+2FA1F
-}
-
-index main4
-{
-        source                  = main4
-        path                    = LOCALSTATEDIR/piler/sphinx/main4
-        docinfo                 = extern
-	dict			= keywords
-        min_prefix_len          = 5
-        min_word_len            = 1
-        #ngram_len               = 1
-        #ngram_chars             = U+3000..U+2FA1F
-}
-
-index dailydelta1
-{
-        source                  = dailydelta
-        path                    = LOCALSTATEDIR/piler/sphinx/dailydelta1
-        docinfo                 = extern
-	dict			= keywords
-        min_prefix_len          = 5
-        min_word_len            = 1
-        #ngram_len               = 1
-        #ngram_chars             = U+3000..U+2FA1F
-}
-
-index delta1
-{
-        source                  = delta
-        path                    = LOCALSTATEDIR/piler/sphinx/delta1
-        docinfo                 = extern
-	dict			= keywords
-        min_prefix_len          = 5
-        min_word_len            = 1
-        #ngram_len               = 1
-        #ngram_chars             = U+3000..U+2FA1F
-}
-
 
 index tag1
 {
@@ -186,16 +61,25 @@ index note1
 }
 
 
-index att1
+index rt1
 {
-        source                  = att
-        path                    = /var/piler/sphinx/att1
-        docinfo                 = extern
-        dict                    = keywords
-        min_prefix_len          = 6
-        min_word_len            = 1
-        ngram_len               = 1
-        ngram_chars             = U+1100..U+2FA1F
+        type = rt
+        path = /var/piler/sphinx/rt1
+        rt_mem_limit = 512M
+
+        rt_field = sender
+        rt_field = fromdomain
+        rt_field = to
+        rt_field = todomain
+        rt_field = subject
+        rt_field = body
+        rt_field = attachment_types
+
+        rt_attr_uint = size
+        rt_attr_uint = direction
+        rt_attr_uint = attachments
+
+        rt_attr_timestamp = sent
 }
 
 
@@ -210,7 +94,9 @@ searchd
 	listen			= 127.0.0.1:9312
 	listen			= 127.0.0.1:9306:mysql41
 	log			= /dev/null
-	binlog_path             = 
+	binlog_path             = /var/piler/sphinx
+        binlog_flush            = 2
+        binlog_max_log_size     = 64M
 	##query_log		=
 	read_timeout		= 5
 	max_children		= 30
