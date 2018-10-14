@@ -240,10 +240,6 @@ struct session_data {
 #ifdef NEED_MYSQL
    MYSQL mysql;
 #endif
-#ifdef NEED_PSQL
-   PGconn *psql;
-   char conninfo[SMALLBUFSIZE];
-#endif
 };
 
 

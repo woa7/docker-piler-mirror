@@ -408,14 +408,13 @@ int check_spam_rule(int is_spam, int spam){
 int check_attachment_rule(struct parser_state *state, struct rule *rule){
    int i;
    size_t nmatch=0;
-   int ismatch = 0;
 
    if(state->n_attachments == 0) return RULE_UNDEF;
 
    if(rule->emptyaname == 1 && rule->emptyatype == 1) return RULE_UNDEF;
 
    for(i=1; i<=state->n_attachments; i++){
-      ismatch = 0;
+      int ismatch = 0;
 
       if(rule->emptyaname == 0){
          if(regexec(&(rule->attachment_name), state->attachments[i].filename, nmatch, NULL, 0) == 0)
@@ -446,13 +445,13 @@ void initrules(struct node *xhash[]){
 
 
 void clearrules(struct node *xhash[]){
-   struct node *p, *q;
+   struct node *q;
    struct rule *rule;
 
    q = xhash[0];
 
    while(q != NULL){
-      p = q;
+      struct node *p = q;
       q = q->r;
 
       if(p){

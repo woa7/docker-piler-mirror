@@ -11,7 +11,6 @@
 
 
 void load_mydomains(struct session_data *sdata, struct data *data, struct config *cfg){
-   int rc;
    char s[SMALLBUFSIZE];
    struct sql sql;
 
@@ -32,7 +31,7 @@ void load_mydomains(struct session_data *sdata, struct data *data, struct config
       p_store_results(&sql);
 
       while(p_fetch_results(&sql) == OK){
-         rc = addnode(data->mydomains, s);
+         int rc = addnode(data->mydomains, s);
 
          if(rc == 0) syslog(LOG_PRIORITY, "failed to append mydomain: '%s'", s);
          else if(cfg->verbosity >= _LOG_DEBUG) syslog(LOG_PRIORITY, "added mydomain: '%s'", s);

@@ -53,14 +53,12 @@ void usage(){
 
 
 void p_clean_exit(int sig){
-   int i;
-
    if(sig > 0) syslog(LOG_PRIORITY, "got signal: %d, %s", sig, strsignal(sig));
 
    if(listenerfd != -1) close(listenerfd);
 
    if(sessions){
-      for(i=0; i<cfg.max_connections; i++){
+      for(int i=0; i<cfg.max_connections; i++){
          if(sessions[i]) free_smtp_session(sessions[i]);
       }
 
@@ -85,12 +83,11 @@ void fatal(char *s){
 
 void check_for_client_timeout(){
    time_t now;
-   int i;
 
    if(num_connections > 0){
       time(&now);
 
-      for(i=0; i<cfg.max_connections; i++){
+      for(int i=0; i<cfg.max_connections; i++){
          if(sessions[i] && now - sessions[i]->lasttime >= cfg.smtp_timeout){
             syslog(LOG_PRIORITY, "client %s timeout", sessions[i]->remote_host);
             tear_down_session(sessions, sessions[i]->slot, &num_connections);
@@ -128,7 +125,7 @@ void initialise_configuration(){
 
 int main(int argc, char **argv){
    int listenerfd, client_sockfd;
-   int i, n, daemonise=0;
+   int i, daemonise=0;
    int client_len = sizeof(struct sockaddr_storage);
    ssize_t readlen;
    struct sockaddr_storage client_address;
@@ -212,14 +209,14 @@ int main(int argc, char **argv){
 
    syslog(LOG_PRIORITY, "%s %s, build %d starting", PROGNAME, VERSION, get_build());
 
-#if HAVE_DAEMON == 1
+#if HAVE_DAEMON
    if(daemonise == 1 && daemon(1, 0) == -1) fatal(ERR_DAEMON);
 #endif
 
    alarm(timeout);
 
    for(;;){
-      n = epoll_wait(efd, events, cfg.max_connections, -1);
+      int n = epoll_wait(efd, events, cfg.max_connections, -1);
       for(i=0; i<n; i++){
 
          // Office365 sometimes behaves oddly: when it receives the 250 OK

@@ -40,7 +40,7 @@ int remove_xml(char *src, char *dest, int destlen, int *html){
 
 #ifdef HAVE_ZIP
 int extract_opendocument(struct session_data *sdata, struct parser_state *state, char *filename, char *prefix){
-   int errorp, i=0, len=0, html=0;
+   int errorp, i=0, html=0;
    int len2;
    char buf[4*MAXBUFSIZE], puf[4*MAXBUFSIZE];
    struct zip *z;
@@ -60,6 +60,8 @@ int extract_opendocument(struct session_data *sdata, struct parser_state *state,
 
          zf = zip_fopen_index(z, i, 0);
          if(zf){
+            int len;
+
             while((len = zip_fread(zf, buf, sizeof(buf)-2)) > 0){
 
                len2 = remove_xml(buf, puf, sizeof(puf), &html);
@@ -206,9 +208,8 @@ void kill_helper(){
 
 
 void extract_attachment_content(struct session_data *sdata, struct parser_state *state, char *filename, char *type, int *rec, struct config *cfg){
-   int link[2], n;
+   int link[2];
    pid_t pid;
-   char outbuf[MAXBUFSIZE];
 
    if(strcmp(type, "other") == 0 || strcmp(type, "text") == 0) return;
 
@@ -302,6 +303,9 @@ void extract_attachment_content(struct session_data *sdata, struct parser_state 
       die("execl");
    }
    else {
+      int n;
+      char outbuf[MAXBUFSIZE];
+
       close(link[1]);
       while((n = read(link[0], outbuf, sizeof(outbuf))) > 0){
          if(state->bodylen < BIGBUFSIZE-n-1){

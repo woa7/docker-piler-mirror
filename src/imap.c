@@ -91,10 +91,7 @@ END:
 
 
 int connect_to_imap_server(struct data *data){
-   int n;
    char buf[MAXBUFSIZE];
-   X509* server_cert;
-   char *str;
 
    data->import->cap_uidplus = 0;
 
@@ -113,15 +110,15 @@ int connect_to_imap_server(struct data *data){
       CHK_NULL(data->net->ssl, "internal ssl error");
 
       SSL_set_fd(data->net->ssl, data->net->socket);
-      n = SSL_connect(data->net->ssl);
+      int n = SSL_connect(data->net->ssl);
       CHK_SSL(n, "internal ssl error");
 
       printf("Cipher: %s\n", SSL_get_cipher(data->net->ssl));
 
-      server_cert = SSL_get_peer_certificate(data->net->ssl);
+      X509 *server_cert = SSL_get_peer_certificate(data->net->ssl);
       CHK_NULL(server_cert, "server cert error");
 
-      str = X509_NAME_oneline(X509_get_subject_name(server_cert), 0, 0);
+      char *str = X509_NAME_oneline(X509_get_subject_name(server_cert), 0, 0);
       CHK_NULL(str, "error in server cert");
       printf("server cert:\n\t subject: %s\n", str);
       OPENSSL_free(str);

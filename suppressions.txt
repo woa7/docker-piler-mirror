@@ -1,0 +1,7 @@
+unusedFunction:src/cfg.c:20
+unusedFunction:src/memc.c:288
+unusedFunction:src/message.c:138
+unreadVariable:src/pilerexport.c:326
+unusedFunction:src/sig.c:33
+unusedFunction:src/sig.c:38
+unusedFunction:src/sig.c:44

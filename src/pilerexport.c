@@ -95,7 +95,7 @@ unsigned long convert_time(char *yyyymmdd, int h, int m, int s){
 
 
 int append_email_to_buffer(char **buffer, char *email){
-   int len, arglen;
+   int arglen;
    char *s=NULL, emailaddress[SMALLBUFSIZE];
 
    snprintf(emailaddress, sizeof(emailaddress)-1, "'%s'", email);
@@ -107,7 +107,7 @@ int append_email_to_buffer(char **buffer, char *email){
       memcpy(*buffer, emailaddress, arglen);
    }
    else {
-      len = strlen(*buffer);
+      int len = strlen(*buffer);
       s = realloc(*buffer, len + arglen+2);
       if(!s){
          printf("malloc problem!\n");
@@ -126,7 +126,7 @@ int append_email_to_buffer(char **buffer, char *email){
 
 
 int append_string_to_buffer(char **buffer, char *str){
-   int len, arglen;
+   int arglen;
    char *s=NULL;
 
    arglen = strlen(str);
@@ -137,7 +137,7 @@ int append_string_to_buffer(char **buffer, char *str){
       memcpy(*buffer, str, arglen);
    }
    else {
-      len = strlen(*buffer);
+      int len = strlen(*buffer);
       s = realloc(*buffer, len + arglen+1);
       if(!s) return 1;
 
@@ -152,8 +152,6 @@ int append_string_to_buffer(char **buffer, char *str){
 
 
 uint64 run_query(struct session_data *sdata, struct session_data *sdata2, char *where_condition, uint64 last_id, int *num, struct config *cfg){
-   MYSQL_RES *res;
-   MYSQL_ROW row;
    int rc=0;
    uint64 id=0;
    char s[SMALLBUFSIZE];
@@ -168,8 +166,9 @@ uint64 run_query(struct session_data *sdata, struct session_data *sdata2, char *
    snprintf(s, sizeof(s)-1, "SELECT id FROM %s WHERE %s AND id > %llu ORDER BY id ASC LIMIT 0,%d", index_list, where_condition, last_id, max_matches);
 
    if(mysql_real_query(&(sdata2->mysql), s, strlen(s)) == 0){
-      res = mysql_store_result(&(sdata2->mysql));
+      MYSQL_RES *res = mysql_store_result(&(sdata2->mysql));
       if(res != NULL){
+         MYSQL_ROW row;
          while((row = mysql_fetch_row(res))){
             id = strtoull(row[0], NULL, 10);
             (*num)++;
@@ -194,13 +193,12 @@ uint64 run_query(struct session_data *sdata, struct session_data *sdata2, char *
 
 
 uint64 get_total_found(struct session_data *sdata){
-   MYSQL_RES *res;
-   MYSQL_ROW row;
    uint64 total_found=0;
 
    if(mysql_real_query(&(sdata->mysql), "SHOW META LIKE 'total_found'", 28) == 0){
-      res = mysql_store_result(&(sdata->mysql));
+      MYSQL_RES *res = mysql_store_result(&(sdata->mysql));
       if(res != NULL){
+         MYSQL_ROW row;
          while((row = mysql_fetch_row(res))){
             total_found = strtoull(row[1], NULL, 10);
          }
@@ -313,7 +311,7 @@ int build_query_from_args(char *from, char *to, char *fromdomain, char *todomain
 
    if(startdate > 0){
       if(where_condition) rc = append_string_to_buffer(&query, " AND ");
-      snprintf(s, sizeof(s)-1, " `sent` >= %ld", startdate);
+      snprintf(s, sizeof(s)-1, " `sent` >= %lu", startdate);
       rc += append_string_to_buffer(&query, s);
 
       where_condition++;
@@ -322,7 +320,7 @@ int build_query_from_args(char *from, char *to, char *fromdomain, char *todomain
 
    if(stopdate > 0){
       if(where_condition) rc = append_string_to_buffer(&query, " AND ");
-      snprintf(s, sizeof(s)-1, " `sent` <= %ld", stopdate);
+      snprintf(s, sizeof(s)-1, " `sent` <= %lu", stopdate);
       rc += append_string_to_buffer(&query, s);
 
       where_condition++;
@@ -410,7 +408,7 @@ ENDE:
 
 
 int main(int argc, char **argv){
-   int c, minsize=0, maxsize=0;
+   int minsize=0, maxsize=0;
    size_t nmatch=0;
    unsigned long startdate=0, stopdate=0;
    char *configfile=CONFIG_FILE;
@@ -451,9 +449,9 @@ int main(int argc, char **argv){
 
       int option_index = 0;
 
-      c = getopt_long(argc, argv, "c:s:S:f:r:F:R:a:b:w:m:i:Adhv?", long_options, &option_index);
+      int c = getopt_long(argc, argv, "c:s:S:f:r:F:R:a:b:w:m:i:Adhv?", long_options, &option_index);
 #else
-      c = getopt(argc, argv, "c:s:S:f:r:F:R:a:b:w:m:i:Adhv?");
+      int c = getopt(argc, argv, "c:s:S:f:r:F:R:a:b:w:m:i:Adhv?");
 #endif
 
       if(c == -1) break;

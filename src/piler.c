@@ -106,7 +106,6 @@ int process_email(char *filename, struct session_data *sdata, struct data *data,
    char tmpbuf[SMALLBUFSIZE];
    char *status=S_STATUS_UNDEF;
    char *arule;
-   char *rcpt;
    char *p;
    struct timezone tz;
    struct timeval tv1, tv2;
@@ -134,6 +133,8 @@ int process_email(char *filename, struct session_data *sdata, struct data *data,
    post_parse(sdata, &parser_state, cfg);
 
    if(cfg->syslog_recipients == 1){
+      char *rcpt;
+
       rcpt = parser_state.b_to;
       do {
          rcpt = split_str(rcpt, " ", tmpbuf, sizeof(tmpbuf)-1);
@@ -467,7 +468,7 @@ void initialise_configuration(){
 
 
 int main(int argc, char **argv){
-   int i, daemonise=0, dedupfd;
+   int i, daemonise=0;
    struct stat st;
 
 
@@ -520,7 +521,7 @@ int main(int argc, char **argv){
    if(stat(cfg.pidfile, &st) == 0) fatal(ERR_PID_FILE_EXISTS);
 
    if(cfg.mmap_dedup_test == 1){
-      dedupfd = open(MESSAGE_ID_DEDUP_FILE, O_RDWR);
+      int dedupfd = open(MESSAGE_ID_DEDUP_FILE, O_RDWR);
       if(dedupfd == -1) fatal(ERR_OPEN_DEDUP_FILE);
 
       data.dedup = mmap(NULL, MAXCHILDREN*DIGEST_LENGTH*2, PROT_READ|PROT_WRITE, MAP_SHARED, dedupfd, 0);
@@ -531,7 +532,7 @@ int main(int argc, char **argv){
 
    syslog(LOG_PRIORITY, "%s %s, build %d starting", PROGNAME, VERSION, get_build());
 
-#if HAVE_DAEMON == 1
+#if HAVE_DAEMON
    if(daemonise == 1 && daemon(1, 0) == -1) fatal(ERR_DAEMON);
 #endif
 

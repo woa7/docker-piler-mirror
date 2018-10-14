@@ -51,19 +51,18 @@ struct counters load_counters(struct session_data *sdata){
 void update_counters(struct session_data *sdata, struct counters *counters, struct config *cfg){
    char buf[MAXBUFSIZE];
 #ifdef HAVE_MEMCACHED
-   unsigned long long mc, rcvd;
+   unsigned long long mc;
    struct counters c;
-   char key[MAX_MEMCACHED_KEY_LEN];
    unsigned int flags=0;
 
-   if(counters->c_virus + counters->c_duplicate + counters->c_ignore + counters->c_size + counters->c_stored_size <= 0) return;
+   if(counters->c_virus + counters->c_duplicate + counters->c_ignore + counters->c_size + counters->c_stored_size < 1) return;
 
    if(cfg->update_counters_to_memcached == 1){
 
       /* increment counters to memcached */
 
       if(memcached_increment(&(data->memc), MEMCACHED_MSGS_RCVD, strlen(MEMCACHED_MSGS_RCVD), counters->c_rcvd, &mc) == MEMCACHED_SUCCESS){
-         rcvd = mc;
+         unsigned long long rcvd = mc;
 
          if(counters->c_virus > 0) memcached_increment(&(data->memc), MEMCACHED_MSGS_VIRUS, strlen(MEMCACHED_MSGS_VIRUS), counters->c_virus, &mc);
          if(counters->c_duplicate > 0) memcached_increment(&(data->memc), MEMCACHED_MSGS_DUPLICATE, strlen(MEMCACHED_MSGS_DUPLICATE), counters->c_duplicate, &mc);
@@ -77,6 +76,8 @@ void update_counters(struct session_data *sdata, struct counters *counters, stru
          snprintf(buf, MAXBUFSIZE-1, "%s %s %s %s %s %s %s", MEMCACHED_MSGS_RCVD, MEMCACHED_MSGS_VIRUS, MEMCACHED_MSGS_DUPLICATE, MEMCACHED_MSGS_IGNORE, MEMCACHED_MSGS_SIZE, MEMCACHED_MSGS_STORED_SIZE, MEMCACHED_COUNTERS_LAST_UPDATE);
 
          if(memcached_mget(&(data->memc), buf) == MEMCACHED_SUCCESS){
+            char key[MAX_MEMCACHED_KEY_LEN];
+
             while((memcached_fetch_result(&(data->memc), &key[0], &buf[0], &flags))){
                if(!strcmp(key, MEMCACHED_MSGS_RCVD)) c.c_rcvd = strtoull(buf, NULL, 10);
                else if(!strcmp(key, MEMCACHED_MSGS_VIRUS)) c.c_virus = strtoull(buf, NULL, 10);
@@ -117,7 +118,7 @@ void update_counters(struct session_data *sdata, struct counters *counters, stru
    }
    else {
 #endif
-      if(counters->c_virus + counters->c_duplicate + counters->c_ignore + counters->c_size + counters->c_stored_size <= 0) return;
+      if(counters->c_virus + counters->c_duplicate + counters->c_ignore + counters->c_size + counters->c_stored_size < 1) return;
 
       snprintf(buf, SMALLBUFSIZE-1, "UPDATE `%s` SET `rcvd`=`rcvd`+%llu, `virus`=`virus`+%llu, `duplicate`=`duplicate`+%llu, `ignore`=`ignore`+%llu, `size`=`size`+%llu, `stored_size`=`stored_size`+%llu", SQL_COUNTER_TABLE, counters->c_rcvd, counters->c_virus, counters->c_duplicate, counters->c_ignore, counters->c_size, counters->c_stored_size);
       p_query(sdata, buf);

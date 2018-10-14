@@ -61,8 +61,6 @@ struct parser_state parse_message(struct session_data *sdata, int take_into_piec
 
 void post_parse(struct session_data *sdata, struct parser_state *state, struct config *cfg){
    int i, rec=0;
-   unsigned int len;
-   char *p;
 
    clearhash(state->boundaries);
    clearhash(state->rcpt);
@@ -92,8 +90,8 @@ void post_parse(struct session_data *sdata, struct parser_state *state, struct c
 
       if(cfg->verbosity >= _LOG_DEBUG) syslog(LOG_PRIORITY, "%s: attachment list: i:%d, name=*%s*, type: *%s*, size: %d, int.name: %s, digest: %s", sdata->ttmpfile, i, state->attachments[i].filename, state->attachments[i].type, state->attachments[i].size, state->attachments[i].internalname, state->attachments[i].digest);
 
-      p = determine_attachment_type(state->attachments[i].filename, state->attachments[i].type);
-      len = strlen(p);
+      char *p = determine_attachment_type(state->attachments[i].filename, state->attachments[i].type);
+      unsigned int len = strlen(p);
       if(strlen(sdata->attachments) < SMALLBUFSIZE-len-1 && !strstr(sdata->attachments, p)) memcpy(&(sdata->attachments[strlen(sdata->attachments)]), p, len);
 
       if(state->attachments[i].dumped == 1){
@@ -142,8 +140,7 @@ void storno_attachment(struct parser_state *state){
 int parse_line(char *buf, struct parser_state *state, struct session_data *sdata, int take_into_pieces, char *writebuffer, int writebuffersize, char *abuffer, int abuffersize, struct data *data, struct config *cfg){
    char *p, *q, puf[SMALLBUFSIZE];
    unsigned char b64buffer[MAXBUFSIZE];
-   char tmpbuf[MAXBUFSIZE];
-   int n64, writelen, boundary_line=0, result;
+   int n64, boundary_line=0, result;
    unsigned int len, domainlen;
 
    if(cfg->debug == 1) printf("line: %s", buf);
@@ -261,7 +258,7 @@ int parse_line(char *buf, struct parser_state *state, struct session_data *sdata
             }
             else {
                snprintf(puf, sizeof(puf)-1, "ATTACHMENT_POINTER_%s.a%d_XXX_PILER", sdata->ttmpfile, state->n_attachments);
-               writelen = strlen(puf);
+               int writelen = strlen(puf);
                if(writelen + state->writebufpos > writebuffersize-1){
                   if(write(state->mfd, writebuffer, state->writebufpos) == -1) syslog(LOG_PRIORITY, "ERROR: write(), %s, %d, %s", __func__, __LINE__, __FILE__);
                   state->writebufpos = 0;
@@ -631,6 +628,8 @@ int parse_line(char *buf, struct parser_state *state, struct session_data *sdata
 
    /* encode the body if it's not utf-8 encoded */
    if(state->message_state == MSG_BODY && state->utf8 != 1){
+      char tmpbuf[MAXBUFSIZE];
+
       result = utf8_encode(buf, strlen(buf), &tmpbuf[0], sizeof(tmpbuf), state->charset);
       if(result == OK) snprintf(buf, MAXBUFSIZE-1, "%s", tmpbuf);
    }
@@ -651,8 +650,6 @@ int parse_line(char *buf, struct parser_state *state, struct session_data *sdata
       if(puf[0] == '\0') continue;
 
       degenerateToken((unsigned char*)puf);
-
-      if(puf[0] == '\0') continue;
 
       strncat(puf, " ", sizeof(puf)-strlen(puf)-1);
 

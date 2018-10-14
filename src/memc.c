@@ -59,7 +59,7 @@ void memcached_init(struct memcached_server *ptr, char *server_ip, int server_po
 
 
 int set_socket_options(struct memcached_server *ptr){
-   int error, flag=1, flags, rval;
+   int error, flag=1, flags;
    struct timeval waittime;
    struct linger linger;
 
@@ -128,7 +128,7 @@ int set_socket_options(struct memcached_server *ptr){
 
 
    if((flags & O_NONBLOCK) == 0){
-      rval = fcntl(ptr->fd, F_SETFL, flags | O_NONBLOCK);
+      int rval = fcntl(ptr->fd, F_SETFL, flags | O_NONBLOCK);
       if(rval == -1) return MEMCACHED_FAILURE;
    }
 
@@ -222,7 +222,7 @@ int memcached_add(struct memcached_server *ptr, char *key, unsigned int keylen, 
 
    if(memcached_connect(ptr) != MEMCACHED_SUCCESS) return MEMCACHED_FAILURE;
 
-   snprintf(ptr->buf, MAXBUFSIZE-1, "add %s %d %ld %d \r\n", key, flags, expiry, valuelen);
+   snprintf(ptr->buf, MAXBUFSIZE-1, "add %s %u %lu %u \r\n", key, flags, expiry, valuelen);
    len = strlen(ptr->buf);
 
    strncat(ptr->buf, value, MAXBUFSIZE-strlen(ptr->buf)-1);
@@ -245,7 +245,7 @@ int memcached_set(struct memcached_server *ptr, char *key, unsigned int keylen, 
 
    if(memcached_connect(ptr) != MEMCACHED_SUCCESS) return MEMCACHED_FAILURE;
 
-   snprintf(ptr->buf, MAXBUFSIZE-1, "set %s %d %ld %d \r\n", key, flags, expiry, valuelen);
+   snprintf(ptr->buf, MAXBUFSIZE-1, "set %s %u %lu %u \r\n", key, flags, expiry, valuelen);
    len = strlen(ptr->buf);
 
    strncat(ptr->buf, value, MAXBUFSIZE-strlen(ptr->buf)-1);

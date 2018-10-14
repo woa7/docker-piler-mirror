@@ -89,7 +89,6 @@ void process_data(struct smtp_session *session, char *buf, int buflen){
 
 void wait_for_ssl_accept(struct smtp_session *session){
    int rc;
-   char ssl_error[SMALLBUFSIZE];
 
    if(session->cfg->verbosity >= _LOG_DEBUG) syslog(LOG_PRIORITY, "waiting for ssl handshake");
 
@@ -106,6 +105,8 @@ void wait_for_ssl_accept(struct smtp_session *session){
    }
 
    if(session->cfg->verbosity >= _LOG_DEBUG || session->net.use_ssl == 0){
+      char ssl_error[SMALLBUFSIZE];
+
       ERR_error_string_n(ERR_get_error(), ssl_error, SMALLBUFSIZE);
       syslog(LOG_PRIORITY, "SSL_accept() result, rc=%d, errorcode: %d, error text: %s",
              rc, SSL_get_error(session->net.ssl, rc), ssl_error);

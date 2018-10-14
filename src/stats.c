@@ -68,12 +68,11 @@ int query_counters(struct session_data *sdata, struct stats *stats){
 
 int get_last_email_archived_timestamp(struct session_data *sdata, struct stats *stats){
    int rc=ERR;
-   unsigned long arrived=86400;
    struct sql sql;
 
    // By default we haven't archived a mail a day ago, and this value should represent an error
    time(&(sdata->now));
-   arrived = sdata->now - 86400;
+   unsigned long arrived = sdata->now - 86400;
 
    if(prepare_sql_statement(sdata, &sql, "select arrived from metadata order by id desc limit 1") == ERR) return rc;
 
@@ -134,12 +133,13 @@ void sphinx_queries(struct session_data *sdata, struct stats *stats){
 
 void count_error_emails(struct stats *stats){
    DIR *dir;
-   struct dirent *de;
    struct stat st;
-   char buf[SMALLBUFSIZE];
 
    dir = opendir(ERROR_DIR);
    if(dir){
+      struct dirent *de;
+      char buf[SMALLBUFSIZE];
+
       while((de = readdir(dir))){
          if(strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue;
 

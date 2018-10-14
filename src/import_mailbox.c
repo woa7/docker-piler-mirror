@@ -24,7 +24,7 @@
 
 int import_from_mailbox(char *mailbox, struct session_data *sdata, struct data *data, struct config *cfg){
    FILE *F, *f=NULL;
-   int rc=ERR, tot_msgs=0, ret=OK;
+   int rc=ERR, ret=OK;
    char buf[MAXBUFSIZE];
    time_t t;
 
@@ -40,7 +40,6 @@ int import_from_mailbox(char *mailbox, struct session_data *sdata, struct data *
    while(fgets(buf, sizeof(buf)-1, F)){
 
       if(buf[0] == 'F' && buf[1] == 'r' && buf[2] == 'o' && buf[3] == 'm' && buf[4] == ' '){
-         tot_msgs++;
          if(f){
             fclose(f);
             f = NULL;

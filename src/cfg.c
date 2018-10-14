@@ -35,13 +35,6 @@ int int_parser(char *src, int *target){
 };
 
 
-int float_parser(char *src, float *target){
-   *target = strtof(src, (char **) NULL);
-
-   return 0;
-};
-
-
 struct _parse_rule {
    char *name;
    char *type;
