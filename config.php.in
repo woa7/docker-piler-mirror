@@ -274,6 +274,9 @@ $config['FOUR_EYES_LOGIN_FOR_AUDITOR'] = 0;
 $config['MEMCACHED_PREFIX'] = '_piler:';
 $config['MEMCACHED_TTL'] = 900;
 
+// http://127.0.0.1:8080
+$config['S3_APP_URL'] = '';
+
 $SUPPRESS_RECIPIENTS = array();
 
 

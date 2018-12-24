@@ -151,13 +151,12 @@ int store_file(struct session_data *sdata, char *filename, int len, struct confi
    }
 
 
+   if(p){
+      *p = '.';
+      strncat(s, p, sizeof(s)-strlen(s)-1);
+   }
+
    if(cfg->s3 == 0){
-      if(p){
-         *p = '.';
-         strncat(s, p, sizeof(s)-strlen(s)-1);
-      }
-
-
       p0 = strrchr(s, '/'); if(!p0) goto ENDE;
       *p0 = '\0';
 

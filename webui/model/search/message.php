@@ -45,20 +45,24 @@ class ModelSearchMessage extends Model {
 
       if($id == '' || !preg_match("/^([0-9a-f]+)$/", $id)) { return $s; }
 
-      if(LOG_LEVEL >= DEBUG) { syslog(LOG_INFO, DECRYPT_BINARY . " $id"); }
+      if(S3_APP_URL) {
+         $s = file_get_contents(S3_APP_URL . "/piler/" . $id . ".m");
+      } else {
+         if(LOG_LEVEL >= DEBUG) { syslog(LOG_INFO, DECRYPT_BINARY . " $id"); }
 
-      $handle = popen(DECRYPT_BINARY . " $id", "r");
-      while(($buf = fread($handle, DECRYPT_BUFFER_LENGTH))) {
-         $s .= $buf;
-      }
-      pclose($handle);
-
-      if($s == '') {
-         $handle = popen(DECRYPT_BINARY . " $id nocrypt", "r");
+         $handle = popen(DECRYPT_BINARY . " $id", "r");
          while(($buf = fread($handle, DECRYPT_BUFFER_LENGTH))) {
             $s .= $buf;
          }
          pclose($handle);
+
+         if($s == '') {
+            $handle = popen(DECRYPT_BINARY . " $id nocrypt", "r");
+            while(($buf = fread($handle, DECRYPT_BUFFER_LENGTH))) {
+               $s .= $buf;
+            }
+            pclose($handle);
+         }
       }
 
       if(ENABLE_ON_THE_FLY_VERIFICATION == 0) {
@@ -82,13 +86,17 @@ class ModelSearchMessage extends Model {
 
       if($piler_id == '' || $attachment_id == '' || !preg_match("/^([0-9a-f]+)$/", $piler_id) || !preg_match("/^([0-9m]+)$/", $attachment_id)) { return $data; }
 
-      if(LOG_LEVEL >= DEBUG) { syslog(LOG_INFO, DECRYPT_ATTACHMENT_BINARY . " $piler_id $attachment_id"); }
+      if(S3_APP_URL) {
+         $s = file_get_contents(S3_APP_URL . "/a/" . $piler_id . ".a" . $attachment_id);
+      } else {
+         if(LOG_LEVEL >= DEBUG) { syslog(LOG_INFO, DECRYPT_ATTACHMENT_BINARY . " $piler_id $attachment_id"); }
 
-      $handle = popen(DECRYPT_ATTACHMENT_BINARY . " $piler_id $attachment_id", "r");
-      while(($buf = fread($handle, DECRYPT_BUFFER_LENGTH))){
-         $data .= $buf;
+         $handle = popen(DECRYPT_ATTACHMENT_BINARY . " $piler_id $attachment_id", "r");
+         while(($buf = fread($handle, DECRYPT_BUFFER_LENGTH))){
+            $data .= $buf;
+         }
+         pclose($handle);
       }
-      pclose($handle);
 
       /* check if it's a base64 encoded stuff */
 

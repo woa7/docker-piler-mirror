@@ -47,6 +47,10 @@ struct config {
    char queuedir[MAXVAL];
 
    int s3;
+   char s3_host[MAXVAL];
+   char s3_key[MAXVAL];
+   char s3_access_key[MAXVAL];
+   char s3_secret_key[MAXVAL];
 
    int verbosity;
    char locale[MAXVAL];
