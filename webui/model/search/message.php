@@ -46,7 +46,7 @@ class ModelSearchMessage extends Model {
       if($id == '' || !preg_match("/^([0-9a-f]+)$/", $id)) { return $s; }
 
       if(S3_APP_URL) {
-         $s = file_get_contents(S3_APP_URL . "/piler/" . $id . ".m");
+         $s = file_get_contents(S3_APP_URL . "/m/" . $id . ".m");
       } else {
          if(LOG_LEVEL >= DEBUG) { syslog(LOG_INFO, DECRYPT_BINARY . " $id"); }
 
@@ -87,7 +87,7 @@ class ModelSearchMessage extends Model {
       if($piler_id == '' || $attachment_id == '' || !preg_match("/^([0-9a-f]+)$/", $piler_id) || !preg_match("/^([0-9m]+)$/", $attachment_id)) { return $data; }
 
       if(S3_APP_URL) {
-         $s = file_get_contents(S3_APP_URL . "/a/" . $piler_id . ".a" . $attachment_id);
+         $data = file_get_contents(S3_APP_URL . "/a/" . $piler_id . ".a" . $attachment_id);
       } else {
          if(LOG_LEVEL >= DEBUG) { syslog(LOG_INFO, DECRYPT_ATTACHMENT_BINARY . " $piler_id $attachment_id"); }
 
