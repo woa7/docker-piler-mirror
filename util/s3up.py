@@ -46,6 +46,7 @@ def uploadFile(mc, filename):
             st = os.stat(filename)
             s = mc.put_object(opts['bucket'], filename, f, st.st_size, sse=sse)
             syslog.syslog("Uploaded " + filename)
+            os.unlink(filename)
     except minio.error.ResponseError as err:
         print(err)
 
@@ -57,6 +58,7 @@ def main():
     parser.add_argument("-c", "--config", type=str, help="piler.conf path",
                         default="/etc/piler/piler.conf")
     parser.add_argument("--region", type=str, default="us-east-1")
+    parser.add_argument("--fork", help="fork to background", action='store_true')
 
     args = parser.parse_args()
 
@@ -67,13 +69,14 @@ def main():
     opts['bucket'] = ''
     opts['region'] = args.region
 
-    try:
-        pid = os.fork()
-        if pid > 0:
-            sys.exit(0)
-    except OSError as e:
-        print("fork failed", e)
-        sys.exit(1)
+    if args.fork:
+        try:
+            pid = os.fork()
+            if pid > 0:
+                sys.exit(0)
+        except OSError as e:
+            print("fork failed", e)
+            sys.exit(1)
 
     storedir = opts['storedir'] + '/' + opts['server_id']
 
@@ -95,7 +98,6 @@ def main():
 
             if os.path.isfile(f):
                 uploadFile(mc, f)
-                os.unlink(f)
 
         time.sleep(1)
 

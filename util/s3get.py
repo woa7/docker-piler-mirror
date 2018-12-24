@@ -61,10 +61,10 @@ def get_object(request, name):
     except minio.error.ResponseError as err:
         syslog.syslog(err)
     except minio.error.NoSuchKey as err:
-        syslog.syslog(err)
+        syslog.syslog("%s: %s" % (str(err), name))
 
     if content:
-        result = zlib.decompress(content).decode('utf-8')
+        result = zlib.decompress(content).decode('utf-8', errors='ignore')
 
     return result
 
