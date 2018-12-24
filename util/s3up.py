@@ -44,7 +44,7 @@ def uploadFile(mc, filename):
     try:
         with open(filename, 'rb') as f:
             st = os.stat(filename)
-            s = mc.put_object(bucket, filename, f, st.st_size, sse=sse)
+            s = mc.put_object(opts['bucket'], filename, f, st.st_size, sse=sse)
             syslog.syslog("Uploaded " + filename)
     except minio.error.ResponseError as err:
         print(err)
