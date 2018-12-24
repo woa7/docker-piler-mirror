@@ -9,9 +9,6 @@ import sys
 import syslog
 import time
 
-bucket = 'piler'
-region = 'us-east-1'
-
 opts = {}
 
 
@@ -32,7 +29,7 @@ def read_options(filename="", opts={}):
 
 def createBucket(mc):
     try:
-        mc.make_bucket(bucket, location=region)
+        mc.make_bucket(opts['bucket'], location=opts['region'])
     except minio.error.BucketAlreadyOwnedByYou as err:
         pass
     except minio.error.BucketAlreadyExists as err:
@@ -59,12 +56,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", type=str, help="piler.conf path",
                         default="/etc/piler/piler.conf")
+    parser.add_argument("--region", type=str, default="us-east-1")
 
     args = parser.parse_args()
 
     syslog.openlog(logoption=syslog.LOG_PID, facility=syslog.LOG_MAIL)
 
     read_options(args.config, opts)
+
+    opts['bucket'] = ''
+    opts['region'] = args.region
 
     try:
         pid = os.fork()
@@ -83,11 +84,15 @@ def main():
                      secret_key=opts['s3_secret_key'],
                      secure=True)
 
-    createBucket(mc)
-
     while True:
         files = os.listdir(storedir)
         for f in files:
+            bucket = f[8:11]
+
+            if opts['bucket'] != bucket:
+                opts['bucket'] = bucket
+                createBucket(mc)
+
             if os.path.isfile(f):
                 uploadFile(mc, f)
                 os.unlink(f)

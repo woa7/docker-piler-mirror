@@ -24,8 +24,6 @@ def readOptions(filename, app):
     app['s3_access_key'] = config['piler']['s3_access_key']
     app['s3_secret_key'] = config['piler']['s3_secret_key']
 
-    app['bucket'] = 'piler'
-
 
 async def indexpage(request):
     return aiohttp.web.Response(text="Hello world!")
@@ -57,7 +55,7 @@ def get_object(request, name):
     sse = minio.sse.SSE_C(request.app['s3_key'])
 
     try:
-        data = request.app['mc'].get_object(request.app['bucket'], name, sse=sse)
+        data = request.app['mc'].get_object(name[8:11], name, sse=sse)
         for d in data.stream(32*1024):
             content = content + d
     except minio.error.ResponseError as err:
