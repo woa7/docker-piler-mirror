@@ -274,7 +274,7 @@ $config['FOUR_EYES_LOGIN_FOR_AUDITOR'] = 0;
 $config['MEMCACHED_PREFIX'] = '_piler:';
 $config['MEMCACHED_TTL'] = 900;
 
-// http://127.0.0.1:8080
+// When enabled, it should be http://127.0.0.1:8080 or similar
 $config['S3_APP_URL'] = '';
 
 $SUPPRESS_RECIPIENTS = array();
