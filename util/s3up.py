@@ -5,6 +5,7 @@ import configparser
 import minio
 import minio.sse
 import os
+import sys
 import syslog
 import time
 
@@ -64,6 +65,14 @@ def main():
     syslog.openlog(logoption=syslog.LOG_PID, facility=syslog.LOG_MAIL)
 
     read_options(args.config, opts)
+
+    try:
+        pid = os.fork()
+        if pid > 0:
+            sys.exit(0)
+    except OSError as e:
+        print("fork failed", e)
+        sys.exit(1)
 
     storedir = opts['storedir'] + '/' + opts['server_id']
 
