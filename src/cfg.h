@@ -46,6 +46,8 @@ struct config {
    char workdir[MAXVAL];
    char queuedir[MAXVAL];
 
+   int s3;
+
    int verbosity;
    char locale[MAXVAL];
 

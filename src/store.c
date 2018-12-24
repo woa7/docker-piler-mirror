@@ -102,7 +102,9 @@ int store_file(struct session_data *sdata, char *filename, int len, struct confi
 
    if(rc != Z_OK) goto ENDE;
 
-   if(cfg->encrypt_messages == 1){
+   // For the moment don't encrypt if using S3 storage backend
+
+   if(cfg->s3 == 0 && cfg->encrypt_messages == 1){
       gettimeofday(&tv1, &tz);
 
    #if OPENSSL_VERSION_NUMBER < 0x10100000L
@@ -142,31 +144,38 @@ int store_file(struct session_data *sdata, char *filename, int len, struct confi
    p = strchr(filename, '.');
    if(p) *p = '\0';
 
-   snprintf(s, sizeof(s)-1, "%s/%02x/%c%c%c/%c%c/%c%c/%s", cfg->queuedir, cfg->server_id, filename[8], filename[9], filename[10], filename[RND_STR_LEN-4], filename[RND_STR_LEN-3], filename[RND_STR_LEN-2], filename[RND_STR_LEN-1], filename);
-
-   if(p){
-      *p = '.';
-      strncat(s, p, sizeof(s)-strlen(s)-1);
+   if(cfg->s3){
+      snprintf(s, sizeof(s)-1, "%s/%02x/%s", cfg->queuedir, cfg->server_id, filename);
+   } else {
+      snprintf(s, sizeof(s)-1, "%s/%02x/%c%c%c/%c%c/%c%c/%s", cfg->queuedir, cfg->server_id, filename[8], filename[9], filename[10], filename[RND_STR_LEN-4], filename[RND_STR_LEN-3], filename[RND_STR_LEN-2], filename[RND_STR_LEN-1], filename);
    }
 
 
-   p0 = strrchr(s, '/'); if(!p0) goto ENDE;
-   *p0 = '\0';
+   if(cfg->s3 == 0){
+      if(p){
+         *p = '.';
+         strncat(s, p, sizeof(s)-strlen(s)-1);
+      }
 
-   if(stat(s, &st)){
-      p1 = strrchr(s, '/'); if(!p1) goto ENDE;
-      *p1 = '\0';
-      p2 = strrchr(s, '/'); if(!p2) goto ENDE;
-      *p2 = '\0';
 
-      mkdir(s, 0750);
-      *p2 = '/';
-      mkdir(s, 0750);
-      *p1 = '/';
-      rc = mkdir(s, 0770); if(rc == -1) syslog(LOG_PRIORITY, "%s: mkdir %s: error=%s", sdata->ttmpfile, s, strerror(errno));
+      p0 = strrchr(s, '/'); if(!p0) goto ENDE;
+      *p0 = '\0';
+
+      if(stat(s, &st)){
+         p1 = strrchr(s, '/'); if(!p1) goto ENDE;
+         *p1 = '\0';
+         p2 = strrchr(s, '/'); if(!p2) goto ENDE;
+         *p2 = '\0';
+
+         mkdir(s, 0750);
+         *p2 = '/';
+         mkdir(s, 0750);
+         *p1 = '/';
+         rc = mkdir(s, 0770); if(rc == -1) syslog(LOG_PRIORITY, "%s: mkdir %s: error=%s", sdata->ttmpfile, s, strerror(errno));
+      }
+
+      *p0 = '/';
    }
-
-   *p0 = '/';
 
    unlink(s);
 
@@ -177,7 +186,7 @@ int store_file(struct session_data *sdata, char *filename, int len, struct confi
    }
 
 
-   if(cfg->encrypt_messages == 1){
+   if(cfg->s3 == 0 && cfg->encrypt_messages == 1){
       n = write(fd, outbuf, outlen);
       writelen = outlen;
    }

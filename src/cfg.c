@@ -102,6 +102,7 @@ struct _parse_rule config_parse_rules[] =
    { "piler_header_field", "string", (void*) string_parser, offsetof(struct config, piler_header_field), "X-piler-id:", MAXVAL-1},
    { "process_rcpt_to_addresses", "integer", (void*) int_parser, offsetof(struct config, process_rcpt_to_addresses), "0", sizeof(int)},
    { "queuedir", "string", (void*) string_parser, offsetof(struct config, queuedir), QUEUE_DIR, MAXVAL-1},
+   { "s3", "integer", (void*) int_parser, offsetof(struct config, s3), "0", sizeof(int)},
    { "server_id", "integer", (void*) int_parser, offsetof(struct config, server_id), "0", sizeof(int)},
    { "smtp_timeout", "integer", (void*) int_parser, offsetof(struct config, smtp_timeout), "60", sizeof(int)},
    { "spam_header_line", "string", (void*) string_parser, offsetof(struct config, spam_header_line), "", MAXVAL-1},
